@@ -1,0 +1,78 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NotFoundError, ValidationError } from "../../src/errors/AppError.js";
+
+vi.mock("../../src/repositories/product.repository.js", () => ({
+  productRepository: {
+    findMany: vi.fn(),
+    findById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    updateStock: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+vi.mock("../../src/repositories/category.repository.js", () => ({
+  categoryRepository: {
+    findById: vi.fn(),
+  },
+}));
+
+const { productRepository } = await import("../../src/repositories/product.repository.js");
+const { categoryRepository } = await import("../../src/repositories/category.repository.js");
+const { productService } = await import("../../src/services/product.service.js");
+
+describe("productService", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("throws NotFoundError when the product does not exist", async () => {
+    vi.mocked(productRepository.findById).mockResolvedValue(null);
+
+    await expect(productService.findById("missing-id")).rejects.toThrow(NotFoundError);
+  });
+
+  it("throws ValidationError when creating with a non-existent category", async () => {
+    vi.mocked(categoryRepository.findById).mockResolvedValue(null);
+
+    await expect(
+      productService.create({
+        name: "Test",
+        description: "Test",
+        price: 10,
+        stock: 1,
+        categoryId: "bad-category",
+      }),
+    ).rejects.toThrow(ValidationError);
+    expect(productRepository.create).not.toHaveBeenCalled();
+  });
+
+  it("creates the product once the category is verified to exist", async () => {
+    vi.mocked(categoryRepository.findById).mockResolvedValue({
+      id: "cat-1",
+      name: "Cat",
+      slug: "cat",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vi.mocked(productRepository.create).mockResolvedValue({} as never);
+
+    await productService.create({
+      name: "Test",
+      description: "Test",
+      price: 10,
+      stock: 1,
+      categoryId: "cat-1",
+    });
+
+    expect(productRepository.create).toHaveBeenCalledOnce();
+  });
+
+  it("updateStock rejects when the product does not exist", async () => {
+    vi.mocked(productRepository.findById).mockResolvedValue(null);
+
+    await expect(productService.updateStock("missing-id", 5)).rejects.toThrow(NotFoundError);
+    expect(productRepository.updateStock).not.toHaveBeenCalled();
+  });
+});
