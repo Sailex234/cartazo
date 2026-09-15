@@ -9,6 +9,7 @@ import {
 import { productController } from "../controllers/product.controller.js";
 import { validate } from "../middleware/validate.js";
 import { catchAsync } from "../middleware/catchAsync.js";
+import { requireAuth, requireRole } from "../middleware/auth.middleware.js";
 
 export const productRouter = Router();
 
@@ -26,12 +27,16 @@ productRouter.get(
 
 productRouter.post(
   "/",
+  requireAuth,
+  requireRole("ADMIN"),
   validate({ body: createProductSchema }),
   catchAsync(productController.create),
 );
 
 productRouter.put(
   "/:id",
+  requireAuth,
+  requireRole("ADMIN"),
   validate({ params: productIdParamsSchema, body: updateProductSchema }),
   catchAsync(productController.update),
 );
@@ -40,12 +45,16 @@ productRouter.put(
 // intencional/auditable, no un side-effect de una edición completa. 🔎
 productRouter.patch(
   "/:id/stock",
+  requireAuth,
+  requireRole("ADMIN"),
   validate({ params: productIdParamsSchema, body: updateStockSchema }),
   catchAsync(productController.updateStock),
 );
 
 productRouter.delete(
   "/:id",
+  requireAuth,
+  requireRole("ADMIN"),
   validate({ params: productIdParamsSchema }),
   catchAsync(productController.remove),
 );

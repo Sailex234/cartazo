@@ -13,6 +13,15 @@ enterprise-scale (no microservices, no k8s).
 The project is being built in phases; check recent commits / ask the user for current phase
 status before assuming a feature (auth, cart, Stripe, admin panel) already exists.
 
+**Current phase status** (2026-09-15): Phase 0 (scaffolding), Phase 1 (Prisma schema,
+Product/Category CRUD by layers, Zod validation, centralized error handling) and Phase 2
+(Auth: User model, register/login/logout/me, bcrypt, JWT in an httpOnly cookie,
+`requireAuth`/`requireRole('ADMIN')` guarding all product/category write routes) are done.
+**Phase 3 (Cart, Orders, Stripe) is next, not yet started.** No public endpoint creates an
+ADMIN user (avoids privilege escalation via `/register`, which always creates `CLIENTE`) — the
+first admin is bootstrapped via `apps/api/prisma/seed.ts` (`admin@cartazo.com` /
+`admin12345`, change in any real environment).
+
 ## Setup
 
 ```bash
@@ -25,6 +34,13 @@ docker compose up -d      # Postgres only, for now
 Postgres is exposed on host port **5436**, not the default 5432/5433 — several other local
 projects on this machine already occupy those ports. It's parametrized via `POSTGRES_PORT` in
 `.env`/`docker-compose.yml`, not hardcoded.
+
+Run `docker compose` for this project under the **Docker Desktop** context
+(`desktop-linux`), not the native/default engine — check with `docker context show`
+(`docker context use desktop-linux` if needed). This machine has both engines with
+separate containers; other unrelated local projects run under the native engine, this
+one is meant to live under Docker Desktop specifically. Port 5436 is still required
+either way — the collision is at the host TCP-socket level, not per-engine.
 
 ## Commands
 
@@ -65,11 +81,28 @@ npm-workspaces monorepo:
   `apps/web` as source (no build step: `main`/`types` point straight at `src/index.ts`), so
   request validation and frontend form validation share one definition instead of drifting.
 
-Planned backend layering (routes → controllers → services → repositories):
-routes only wire HTTP to a controller; controllers translate req/res to service calls with no
-business logic of their own; services hold the business rules and call repositories;
-repositories are the only layer that touches Prisma. This is what makes services unit-testable
-without a real database — mock the repository, not Prisma.
+Backend layering (routes → controllers → services → repositories), implemented for
+products/categories in Phase 1: routes only wire HTTP to a controller; controllers translate
+req/res to service calls with no business logic of their own; services hold the business rules
+and call repositories; repositories are the only layer that touches Prisma. This is what makes
+services unit-testable without a real database — mock the repository, not Prisma (see
+`apps/api/tests/unit/*.service.test.ts` for the pattern to follow in later phases).
+
+**Prisma 7 note**: this project is pinned to Prisma `7.10.0` exact (the `latest` npm dist-tag
+was an `8.0.0-rc` release candidate with a broken dependency tree at the time this was set up —
+don't blindly `npm install prisma@latest`). Prisma 7 moved the DB connection URL out of
+`schema.prisma` into `apps/api/prisma.config.ts`, and `PrismaClient` requires a driver adapter
+(`@prisma/adapter-pg` + `pg`) passed to its constructor — see `apps/api/src/lib/prisma.ts`.
+Seeding (`apps/api/prisma/seed.ts`) runs via `npx prisma db seed` or automatically after
+`npx prisma migrate dev`.
+
+**Auth**: JWT (`{userId, role}`, `apps/api/src/lib/jwt.ts`) stored in an httpOnly cookie
+(`apps/api/src/middleware/auth.middleware.ts` exports `requireAuth` and
+`requireRole(...roles)`), not localStorage or an `Authorization` header — mitigates XSS token
+theft, at the cost of needing CORS `credentials: true` + an explicit `origin` (`WEB_ORIGIN` env
+var, no wildcard `*`) for the browser to send/receive the cookie cross-origin between
+`apps/web` (`:3000`) and `apps/api` (`:4000`). The frontend (Phase 5+) must fetch with
+`credentials: "include"` for this to work.
 
 Errors are meant to flow through custom `AppError` subclasses (`NotFoundError`,
 `ValidationError`, etc.) thrown from services/controllers and caught by one centralized Express

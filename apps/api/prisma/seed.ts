@@ -1,4 +1,11 @@
+import bcrypt from "bcrypt";
 import { prisma } from "../src/lib/prisma.js";
+
+// Solo para desarrollo local: no hay endpoint público que cree ADMIN (evita
+// escalación de privilegios vía /register), así que el primer admin se
+// bootstrapea por seed. Cambiar la password en cualquier ambiente real. 🔎
+const ADMIN_EMAIL = "admin@cartazo.com";
+const ADMIN_PASSWORD = "admin12345";
 
 const categories = [
   { name: "Almacén", slug: "almacen" },
@@ -7,6 +14,17 @@ const categories = [
 ];
 
 async function main() {
+  await prisma.user.upsert({
+    where: { email: ADMIN_EMAIL },
+    update: {},
+    create: {
+      email: ADMIN_EMAIL,
+      passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 10),
+      name: "Admin",
+      role: "ADMIN",
+    },
+  });
+
   for (const category of categories) {
     const created = await prisma.category.upsert({
       where: { slug: category.slug },
