@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cartazo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cartazo}
+      POSTGRES_DB: ${POSTGRES_DB:-cartazo}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
