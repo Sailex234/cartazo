@@ -2,7 +2,8 @@ import type { Product } from "@prisma/client";
 import type { CreateProductInput, ProductQuery, UpdateProductInput } from "@cartazo/shared";
 import { productRepository, type PaginatedResult } from "../repositories/product.repository.js";
 import { categoryRepository } from "../repositories/category.repository.js";
-import { NotFoundError, ValidationError } from "../errors/AppError.js";
+import { orderRepository } from "../repositories/order.repository.js";
+import { ConflictError, NotFoundError, ValidationError } from "../errors/AppError.js";
 
 async function findByIdOrThrow(id: string): Promise<Product> {
   const product = await productRepository.findById(id);
@@ -38,6 +39,13 @@ export const productService = {
 
   async remove(id: string): Promise<void> {
     await findByIdOrThrow(id);
+    // Preserva el historial de compras real -- mismo patrón que
+    // category.service.ts usa contra productRepository para no borrar una
+    // categoría con productos.
+    const hasOrders = await orderRepository.existsForProduct(id);
+    if (hasOrders) {
+      throw new ConflictError("Cannot delete a product that has order history");
+    }
     await productRepository.delete(id);
   },
 };

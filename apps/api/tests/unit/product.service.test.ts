@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NotFoundError, ValidationError } from "../../src/errors/AppError.js";
+import { ConflictError, NotFoundError, ValidationError } from "../../src/errors/AppError.js";
 
 vi.mock("../../src/repositories/product.repository.js", () => ({
   productRepository: {
@@ -18,8 +18,15 @@ vi.mock("../../src/repositories/category.repository.js", () => ({
   },
 }));
 
+vi.mock("../../src/repositories/order.repository.js", () => ({
+  orderRepository: {
+    existsForProduct: vi.fn(),
+  },
+}));
+
 const { productRepository } = await import("../../src/repositories/product.repository.js");
 const { categoryRepository } = await import("../../src/repositories/category.repository.js");
+const { orderRepository } = await import("../../src/repositories/order.repository.js");
 const { productService } = await import("../../src/services/product.service.js");
 
 describe("productService", () => {
@@ -74,5 +81,22 @@ describe("productService", () => {
 
     await expect(productService.updateStock("missing-id", 5)).rejects.toThrow(NotFoundError);
     expect(productRepository.updateStock).not.toHaveBeenCalled();
+  });
+
+  it("refuses to delete a product that has order history", async () => {
+    vi.mocked(productRepository.findById).mockResolvedValue({ id: "prod-1" } as never);
+    vi.mocked(orderRepository.existsForProduct).mockResolvedValue(true);
+
+    await expect(productService.remove("prod-1")).rejects.toThrow(ConflictError);
+    expect(productRepository.delete).not.toHaveBeenCalled();
+  });
+
+  it("deletes a product with no order history", async () => {
+    vi.mocked(productRepository.findById).mockResolvedValue({ id: "prod-1" } as never);
+    vi.mocked(orderRepository.existsForProduct).mockResolvedValue(false);
+
+    await productService.remove("prod-1");
+
+    expect(productRepository.delete).toHaveBeenCalledWith("prod-1");
   });
 });
