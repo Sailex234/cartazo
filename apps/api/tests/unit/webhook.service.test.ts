@@ -10,7 +10,7 @@ vi.mock("../../src/repositories/order.repository.js", () => ({
 }));
 
 vi.mock("../../src/lib/mercadopago.js", () => ({
-  mpPaymentClient: { get: vi.fn() },
+  mpPaymentClient: { get: vi.fn(), search: vi.fn() },
 }));
 
 const { orderRepository } = await import("../../src/repositories/order.repository.js");
@@ -92,6 +92,64 @@ describe("webhookService.handlePaymentNotification", () => {
     vi.mocked(orderRepository.findById).mockResolvedValue(null);
 
     await webhookService.handlePaymentNotification("payment-1");
+
+    expect(orderRepository.fulfillPayment).not.toHaveBeenCalled();
+    expect(orderRepository.updateStatus).not.toHaveBeenCalled();
+  });
+
+  it("is a no-op when MercadoPago does not know the payment (404)", async () => {
+    vi.mocked(mpPaymentClient.get).mockRejectedValue({ status: 404 });
+
+    await expect(webhookService.handlePaymentNotification("fake")).resolves.toBeUndefined();
+
+    expect(orderRepository.fulfillPayment).not.toHaveBeenCalled();
+  });
+
+  it("rethrows other MercadoPago errors so the notification is retried", async () => {
+    vi.mocked(mpPaymentClient.get).mockRejectedValue({ status: 500 });
+
+    await expect(webhookService.handlePaymentNotification("payment-1")).rejects.toEqual({ status: 500 });
+  });
+});
+
+describe("webhookService.reconcileOrder", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("fulfills the order when MercadoPago has an approved payment for it", async () => {
+    vi.mocked(mpPaymentClient.search).mockResolvedValue({
+      results: [{ status: "approved", external_reference: "order-1" }],
+    } as never);
+    vi.mocked(orderRepository.findById).mockResolvedValue(basePendingOrder as never);
+
+    await webhookService.reconcileOrder("order-1");
+
+    expect(mpPaymentClient.search).toHaveBeenCalledWith({ options: { external_reference: "order-1" } });
+    expect(orderRepository.fulfillPayment).toHaveBeenCalledWith(basePendingOrder);
+  });
+
+  it("does not cancel an order that has an approved payment after a rejected attempt", async () => {
+    vi.mocked(mpPaymentClient.search).mockResolvedValue({
+      results: [
+        { status: "rejected", external_reference: "order-1" },
+        { status: "approved", external_reference: "order-1" },
+      ],
+    } as never);
+    vi.mocked(orderRepository.findById)
+      .mockResolvedValueOnce(basePendingOrder as never)
+      .mockResolvedValueOnce({ ...basePendingOrder, status: "PAID" } as never);
+
+    await webhookService.reconcileOrder("order-1");
+
+    expect(orderRepository.fulfillPayment).toHaveBeenCalledTimes(1);
+    expect(orderRepository.updateStatus).not.toHaveBeenCalled();
+  });
+
+  it("does nothing when MercadoPago has no payments for the order", async () => {
+    vi.mocked(mpPaymentClient.search).mockResolvedValue({ results: [] } as never);
+
+    await webhookService.reconcileOrder("order-1");
 
     expect(orderRepository.fulfillPayment).not.toHaveBeenCalled();
     expect(orderRepository.updateStatus).not.toHaveBeenCalled();

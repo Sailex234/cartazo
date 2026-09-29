@@ -12,7 +12,12 @@ vi.mock("../../src/repositories/order.repository.js", () => ({
   orderRepository: {
     createFromCart: vi.fn(),
     setPreferenceId: vi.fn(),
+    findById: vi.fn(),
   },
+}));
+
+vi.mock("../../src/services/webhook.service.js", () => ({
+  webhookService: { reconcileOrder: vi.fn() },
 }));
 
 vi.mock("../../src/lib/mercadopago.js", () => ({
@@ -22,6 +27,7 @@ vi.mock("../../src/lib/mercadopago.js", () => ({
 const { cartRepository } = await import("../../src/repositories/cart.repository.js");
 const { orderRepository } = await import("../../src/repositories/order.repository.js");
 const { mpPreferenceClient } = await import("../../src/lib/mercadopago.js");
+const { webhookService } = await import("../../src/services/webhook.service.js");
 const { orderService } = await import("../../src/services/order.service.js");
 
 const baseProduct = {
@@ -124,6 +130,49 @@ describe("orderService.checkout", () => {
     expect((total as Prisma.Decimal).toNumber()).toBe(200);
 
     expect(orderRepository.setPreferenceId).toHaveBeenCalledWith("order-1", "pref-1");
-    expect(result).toEqual({ orderId: "order-1", checkoutUrl: "https://sandbox.mercadopago.com/pref-1" });
+    expect(result).toEqual({ orderId: "order-1", checkoutUrl: "https://mercadopago.com/pref-1" });
+  });
+});
+
+describe("orderService.findByIdForUser", () => {
+  const order = (status: string) => ({ id: "order-1", userId: "user-1", status }) as never;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("reconciles a PENDING order with MercadoPago and returns the refreshed order", async () => {
+    vi.mocked(orderRepository.findById)
+      .mockResolvedValueOnce(order("PENDING"))
+      .mockResolvedValueOnce(order("PAID"));
+
+    const result = await orderService.findByIdForUser("user-1", "order-1");
+
+    expect(webhookService.reconcileOrder).toHaveBeenCalledWith("order-1");
+    expect(result).toMatchObject({ status: "PAID" });
+  });
+
+  it("does not call MercadoPago for an order that is no longer PENDING", async () => {
+    vi.mocked(orderRepository.findById).mockResolvedValue(order("PAID"));
+
+    await orderService.findByIdForUser("user-1", "order-1");
+
+    expect(webhookService.reconcileOrder).not.toHaveBeenCalled();
+  });
+
+  it("returns the order as is when the MercadoPago lookup fails", async () => {
+    vi.mocked(orderRepository.findById).mockResolvedValue(order("PENDING"));
+    vi.mocked(webhookService.reconcileOrder).mockRejectedValue(new Error("MP down"));
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const result = await orderService.findByIdForUser("user-1", "order-1");
+
+    expect(result).toMatchObject({ status: "PENDING" });
+  });
+
+  it("hides orders that belong to someone else", async () => {
+    vi.mocked(orderRepository.findById).mockResolvedValue(order("PENDING"));
+
+    await expect(orderService.findByIdForUser("other-user", "order-1")).rejects.toThrow("not found");
   });
 });

@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { cartRepository } from "../repositories/cart.repository.js";
 import { orderRepository, type OrderWithItems } from "../repositories/order.repository.js";
 import { mpPreferenceClient } from "../lib/mercadopago.js";
+import { webhookService } from "./webhook.service.js";
 import { env } from "../config/env.js";
 import { NotFoundError, ValidationError } from "../errors/AppError.js";
 
@@ -18,7 +19,18 @@ export const orderService = {
     // NotFoundError, no ForbiddenError -- no confirmarle a alguien que una
     // orden ajena existe, mismo criterio que login con credenciales inválidas.
     if (!order || order.userId !== userId) throw new NotFoundError(`Order ${orderId} not found`);
-    return order;
+    if (order.status !== "PENDING") return order;
+
+    // El aviso (webhook) de MercadoPago puede demorarse o no llegar: si la
+    // orden sigue pendiente, se le pregunta directo por sus pagos. Si esa
+    // consulta falla, se devuelve la orden como está, no un error.
+    try {
+      await webhookService.reconcileOrder(orderId);
+    } catch (err) {
+      console.warn(`[orders] no se pudo reconciliar la orden ${orderId}:`, err);
+      return order;
+    }
+    return (await orderRepository.findById(orderId)) ?? order;
   },
 
   async checkout(userId: string): Promise<CheckoutResult> {
@@ -72,7 +84,7 @@ export const orderService = {
       await orderRepository.setPreferenceId(order.id, preference.id);
     }
 
-    const checkoutUrl = preference.sandbox_init_point ?? preference.init_point;
+    const checkoutUrl = preference.init_point ?? preference.sandbox_init_point;
     if (!checkoutUrl) {
       throw new Error("MercadoPago did not return a checkout URL");
     }
