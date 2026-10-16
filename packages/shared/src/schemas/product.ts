@@ -23,6 +23,7 @@ export const productIdParamsSchema = z.object({
 // tipo real y aplica los defaults de paginación en un solo lugar. 🔎
 export const productQuerySchema = z.object({
   category: z.string().uuid().optional(),
+  q: z.string().trim().min(1).max(100).optional(),
   minPrice: z.coerce.number().nonnegative().optional(),
   maxPrice: z.coerce.number().nonnegative().optional(),
   page: z.coerce.number().int().min(1).default(1),

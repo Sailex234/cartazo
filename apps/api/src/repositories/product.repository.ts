@@ -13,6 +13,8 @@ export const productRepository = {
   async findMany(query: ProductQuery): Promise<PaginatedResult<Product>> {
     const where: Prisma.ProductWhereInput = {
       categoryId: query.category,
+      // insensitive: "arroz" matchea "Arroz 1kg"; ILIKE '%q%' no usa índice, ok a esta escala
+      name: query.q ? { contains: query.q, mode: "insensitive" } : undefined,
       price: {
         gte: query.minPrice,
         lte: query.maxPrice,
