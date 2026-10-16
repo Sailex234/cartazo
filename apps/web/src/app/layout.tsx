@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
+import { HeaderNav } from "@/components/HeaderNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,12 +27,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <AuthProvider>
         <header className="border-b border-zinc-200 dark:border-zinc-800">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
             <Link href="/" className="text-xl font-bold tracking-tight">Cartazo</Link>
+            <HeaderNav />
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

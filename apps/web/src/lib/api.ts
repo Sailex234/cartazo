@@ -1,6 +1,7 @@
-import type { ProductQuery } from "@cartazo/shared";
+import type { LoginInput, ProductQuery, PublicUser, RegisterInput } from "@cartazo/shared";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4000";
+// NEXT_PUBLIC_: la misma URL la usan los Server Components y el navegador (auth/carrito).
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 // Prisma serializa Decimal como string en JSON: price llega "1200.5", no número.
 export interface Product {
@@ -34,16 +35,20 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string): Promise<T> {
+async function request<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
+    method: init?.method,
+    // credentials: "include" hace que el navegador mande/reciba la cookie httpOnly del JWT
     credentials: "include",
     cache: "no-store",
+    headers: init?.body !== undefined ? { "Content-Type": "application/json" } : undefined,
+    body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new ApiError(body?.error?.message ?? res.statusText, res.status, body?.error?.code);
   }
-  return res.json();
+  return res.status === 204 ? (undefined as T) : res.json();
 }
 
 export function getProducts(query: Partial<ProductQuery>): Promise<Paginated<Product>> {
@@ -64,3 +69,25 @@ export async function getCategories(): Promise<Category[]> {
 
 export const formatPrice = (price: string) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(Number(price));
+
+export async function login(input: LoginInput): Promise<PublicUser> {
+  return (await request<{ data: PublicUser }>("/api/auth/login", { method: "POST", body: input })).data;
+}
+
+export async function register(input: RegisterInput): Promise<PublicUser> {
+  return (await request<{ data: PublicUser }>("/api/auth/register", { method: "POST", body: input })).data;
+}
+
+export async function logout(): Promise<void> {
+  await request<void>("/api/auth/logout", { method: "POST" });
+}
+
+// 401 = no hay sesión (caso normal, no un error): devuelve null.
+export async function getMe(): Promise<PublicUser | null> {
+  try {
+    return (await request<{ data: PublicUser }>("/api/auth/me")).data;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401) return null;
+    throw err;
+  }
+}
