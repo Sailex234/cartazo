@@ -51,7 +51,7 @@ Run from the repo root (npm workspaces):
 
 ```bash
 npm run dev:api             # apps/api dev server (tsx watch), http://localhost:4000
-npm run dev:web              # apps/web dev server (Next.js), http://localhost:3000 (or next free port)
+npm run dev:web              # apps/web dev server (Next.js), http://localhost:3001 (pinned; :3000 is taken by another local project)
 npm run build                 # build all workspaces
 npm run test                   # test all workspaces
 npm run lint                    # lint all workspaces
@@ -104,7 +104,7 @@ Seeding (`apps/api/prisma/seed.ts`) runs via `npx prisma db seed` or automatical
 `requireRole(...roles)`), not localStorage or an `Authorization` header — mitigates XSS token
 theft, at the cost of needing CORS `credentials: true` + an explicit `origin` (`WEB_ORIGIN` env
 var, no wildcard `*`) for the browser to send/receive the cookie cross-origin between
-`apps/web` (`:3000`) and `apps/api` (`:4000`). The frontend (Phase 5+) must fetch with
+`apps/web` (`:3001`) and `apps/api` (`:4000`). The frontend (Phase 5+) must fetch with
 `credentials: "include"` for this to work.
 
 Errors are meant to flow through custom `AppError` subclasses (`NotFoundError`,
