@@ -4,23 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**Cartazo** — a full-stack TypeScript e-commerce app (catalog, cart, Stripe checkout, admin
+**Cartazo** — a full-stack TypeScript e-commerce app (catalog, cart, MercadoPago checkout, admin
 inventory panel). It fully replaces a legacy plain-PHP/PDO/MySQL products CRUD that used to
 live in this repo; the old code is gone, this is a from-scratch rewrite, not an incremental
 migration. It is a portfolio project — keep solutions solo-project-scale, not
 enterprise-scale (no microservices, no k8s).
 
 The project is being built in phases; check recent commits / ask the user for current phase
-status before assuming a feature (auth, cart, Stripe, admin panel) already exists.
+status before assuming a feature (auth, cart, payments, admin panel) already exists.
 
-**Current phase status** (2026-09-15): Phase 0 (scaffolding), Phase 1 (Prisma schema,
-Product/Category CRUD by layers, Zod validation, centralized error handling) and Phase 2
-(Auth: User model, register/login/logout/me, bcrypt, JWT in an httpOnly cookie,
-`requireAuth`/`requireRole('ADMIN')` guarding all product/category write routes) are done.
-**Phase 3 (Cart, Orders, Stripe) is next, not yet started.** No public endpoint creates an
-ADMIN user (avoids privilege escalation via `/register`, which always creates `CLIENTE`) — the
-first admin is bootstrapped via `apps/api/prisma/seed.ts` (`admin@cartazo.com` /
-`admin12345`, change in any real environment).
+**Current phase status** (2026-10-16): Phases 0-3 are done and committed. Phase 0
+(scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod validation,
+centralized error handling), Phase 2 (Auth: register/login/logout/me, bcrypt, JWT in an
+httpOnly cookie, `requireAuth`/`requireRole('ADMIN')` guarding product/category writes) and
+Phase 3 (Cart, Orders, checkout with **MercadoPago**, not Stripe — Stripe doesn't support
+Argentina; webhook + order reconciliation, verified end-to-end in the MP sandbox).
+**Phase 4 (Next.js frontend: catalog + product detail) is next, not yet started.** No public
+endpoint creates an ADMIN user (avoids privilege escalation via `/register`, which always
+creates `CLIENTE`) — the first admin is bootstrapped via `apps/api/prisma/seed.ts`
+(`admin@cartazo.com` / `admin12345`, change in any real environment).
 
 ## Setup
 
@@ -31,15 +33,16 @@ npm install
 docker compose up -d      # Postgres only, for now
 ```
 
-Postgres is exposed on host port **5436**, not the default 5432/5433 — several other local
-projects on this machine already occupy those ports. It's parametrized via `POSTGRES_PORT` in
+Postgres is exposed on host port **5437** locally (`POSTGRES_PORT` in `.env`; 5436 collided with
+another project), not the default 5432/5433 — several other local projects on this machine
+already occupy those ports. It's parametrized via `POSTGRES_PORT` in
 `.env`/`docker-compose.yml`, not hardcoded.
 
 Run `docker compose` for this project under the **Docker Desktop** context
 (`desktop-linux`), not the native/default engine — check with `docker context show`
 (`docker context use desktop-linux` if needed). This machine has both engines with
 separate containers; other unrelated local projects run under the native engine, this
-one is meant to live under Docker Desktop specifically. Port 5436 is still required
+one is meant to live under Docker Desktop specifically. A non-default port is still required
 either way — the collision is at the host TCP-socket level, not per-engine.
 
 ## Commands
@@ -110,6 +113,5 @@ error-handling middleware, producing one consistent JSON error shape. This is th
 for the legacy project's worst flaw — every old PHP endpoint had a different, often bare-string
 response shape.
 
-Auth (JWT, `admin`/`cliente` roles), Stripe checkout, and the admin panel are not implemented
-yet — see the phased roadmap for what's coming and in what order before building ahead of the
+The frontend (catalog, cart UI, checkout UI) and the admin panel are not implemented yet — see the phased roadmap for what's coming and in what order before building ahead of the
 current phase.
