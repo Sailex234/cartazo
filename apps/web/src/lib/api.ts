@@ -135,3 +135,7 @@ export async function checkout(): Promise<{ orderId: string; checkoutUrl: string
 export async function getOrder(id: string): Promise<Order> {
   return (await request<{ data: Order }>(`/api/orders/${id}`)).data;
 }
+
+export async function getOrders(): Promise<Order[]> {
+  return (await request<{ data: Order[] }>("/api/orders")).data;
+}

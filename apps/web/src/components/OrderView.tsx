@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { formatPrice, getOrder, type Order } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 
-const LABELS = { PENDING: "Pago pendiente", PAID: "Pago confirmado", CANCELLED: "Cancelada" } as const;
+export const ORDER_STATUS_LABELS = { PENDING: "Pago pendiente", PAID: "Pago confirmado", CANCELLED: "Cancelada" } as const;
 
 export function OrderView({ id }: { id: string }) {
   const { user, loading } = useAuth();
@@ -37,14 +37,14 @@ export function OrderView({ id }: { id: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-lg font-medium">{LABELS[order.status]}</p>
+      <p className="text-lg font-medium">{ORDER_STATUS_LABELS[order.status]}</p>
       <ul className="flex flex-col gap-1 text-sm">
         {order.items.map((i) => (
           <li key={i.id}>{i.quantity} × {i.product?.name ?? "Producto"} — {formatPrice(i.unitPrice)}</li>
         ))}
       </ul>
       <p className="text-xl font-semibold">Total: {formatPrice(order.total)}</p>
-      <Link href="/" className="underline">Volver al catálogo</Link>
+      <Link href="/orders" className="underline">Mis órdenes</Link>
     </div>
   );
 }
