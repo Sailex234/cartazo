@@ -91,3 +91,47 @@ export async function getMe(): Promise<PublicUser | null> {
     throw err;
   }
 }
+
+export interface CartItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  product: Product;
+}
+
+export interface Cart {
+  id: string;
+  items: CartItem[];
+}
+
+export interface Order {
+  id: string;
+  status: "PENDING" | "PAID" | "CANCELLED";
+  total: string;
+  createdAt: string;
+  items: { id: string; quantity: number; unitPrice: string; product?: Product }[];
+}
+
+export async function getCart(): Promise<Cart> {
+  return (await request<{ data: Cart }>("/api/cart")).data;
+}
+
+export async function addToCart(productId: string, quantity = 1): Promise<Cart> {
+  return (await request<{ data: Cart }>("/api/cart/items", { method: "POST", body: { productId, quantity } })).data;
+}
+
+export async function updateCartItem(productId: string, quantity: number): Promise<Cart> {
+  return (await request<{ data: Cart }>(`/api/cart/items/${productId}`, { method: "PATCH", body: { quantity } })).data;
+}
+
+export function removeCartItem(productId: string): Promise<void> {
+  return request<void>(`/api/cart/items/${productId}`, { method: "DELETE" });
+}
+
+export async function checkout(): Promise<{ orderId: string; checkoutUrl: string }> {
+  return (await request<{ data: { orderId: string; checkoutUrl: string } }>("/api/orders/checkout", { method: "POST" })).data;
+}
+
+export async function getOrder(id: string): Promise<Order> {
+  return (await request<{ data: Order }>(`/api/orders/${id}`)).data;
+}

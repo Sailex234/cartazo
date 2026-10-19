@@ -13,13 +13,15 @@ enterprise-scale (no microservices, no k8s).
 The project is being built in phases; check recent commits / ask the user for current phase
 status before assuming a feature (auth, cart, payments, admin panel) already exists.
 
-**Current phase status** (2026-10-16): Phases 0-3 are done and committed. Phase 0
-(scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod validation,
-centralized error handling), Phase 2 (Auth: register/login/logout/me, bcrypt, JWT in an
-httpOnly cookie, `requireAuth`/`requireRole('ADMIN')` guarding product/category writes) and
-Phase 3 (Cart, Orders, checkout with **MercadoPago**, not Stripe — Stripe doesn't support
-Argentina; webhook + order reconciliation, verified end-to-end in the MP sandbox).
-**Phase 4 (Next.js frontend: catalog + product detail) is next, not yet started.** No public
+**Current phase status** (2026-10-19): Phases 0-4 are done and committed, plus Phase 5 blocks
+1-2. Phase 0 (scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod
+validation, centralized error handling), Phase 2 (Auth: register/login/logout/me, bcrypt, JWT in
+an httpOnly cookie, `requireAuth`/`requireRole('ADMIN')` guarding product/category writes), Phase 3
+(Cart, Orders, checkout with **MercadoPago**, not Stripe — Stripe doesn't support Argentina;
+webhook + order reconciliation), Phase 4 (Next.js catalog + product detail), Phase 5 block 1
+(login/register/session in the web) and block 2 (cart page, add-to-cart, checkout redirect,
+`/orders/[id]`), verified end-to-end in the MP sandbox. **Next: the rest of Phase 5 (order history
+list) and the admin panel** — check the user for the exact order before building. No public
 endpoint creates an ADMIN user (avoids privilege escalation via `/register`, which always
 creates `CLIENTE`) — the first admin is bootstrapped via `apps/api/prisma/seed.ts`
 (`admin@cartazo.com` / `admin12345`, change in any real environment).
@@ -104,7 +106,7 @@ Seeding (`apps/api/prisma/seed.ts`) runs via `npx prisma db seed` or automatical
 `requireRole(...roles)`), not localStorage or an `Authorization` header — mitigates XSS token
 theft, at the cost of needing CORS `credentials: true` + an explicit `origin` (`WEB_ORIGIN` env
 var, no wildcard `*`) for the browser to send/receive the cookie cross-origin between
-`apps/web` (`:3001`) and `apps/api` (`:4000`). The frontend (Phase 5+) must fetch with
+`apps/web` (`:3001`) and `apps/api` (`:4000`). The frontend must fetch with
 `credentials: "include"` for this to work.
 
 Errors are meant to flow through custom `AppError` subclasses (`NotFoundError`,
@@ -113,5 +115,4 @@ error-handling middleware, producing one consistent JSON error shape. This is th
 for the legacy project's worst flaw — every old PHP endpoint had a different, often bare-string
 response shape.
 
-The frontend (catalog, cart UI, checkout UI) and the admin panel are not implemented yet — see the phased roadmap for what's coming and in what order before building ahead of the
-current phase.
+The admin panel and the order history list are not implemented yet — check with the user before building ahead of the current phase.

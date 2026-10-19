@@ -23,6 +23,7 @@ export function HeaderNav() {
 
   return (
     <nav className="flex items-center gap-4 text-sm">
+      <Link href="/cart" className="underline">Carrito</Link>
       <span>Hola, {user.name}</span>
       <button
         onClick={async () => {

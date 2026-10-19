@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiError, formatPrice, getProduct } from "@/lib/api";
+import { AddToCartButton } from "@/components/AddToCartButton";
 import { ProductImage } from "@/components/ProductImage";
 
 async function load(id: string) {
@@ -34,10 +35,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[id]"
           <p className={product.stock > 0 ? "text-sm text-green-700" : "text-sm text-red-600"}>
             {product.stock > 0 ? `${product.stock} en stock` : "Sin stock"}
           </p>
-          {/* Se habilita en la Fase 5 (cart UI + auth) */}
-          <button disabled className="w-fit rounded-md bg-black px-6 py-3 text-white opacity-50 dark:bg-white dark:text-black">
-            Agregar al carrito
-          </button>
+          <AddToCartButton productId={product.id} disabled={product.stock === 0} />
         </div>
       </div>
     </div>
