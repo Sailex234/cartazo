@@ -154,3 +154,11 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
 export async function updateProduct(id: string, input: UpdateProductInput): Promise<Product> {
   return (await request<{ data: Product }>(`/api/products/${id}`, { method: "PUT", body: input })).data;
 }
+
+export async function updateProductStock(id: string, stock: number): Promise<Product> {
+  return (await request<{ data: Product }>(`/api/products/${id}/stock`, { method: "PATCH", body: { stock } })).data;
+}
+
+export function deleteProduct(id: string): Promise<void> {
+  return request<void>(`/api/products/${id}`, { method: "DELETE" });
+}

@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { formatPrice, getCategories, getProducts, type Category, type Paginated, type Product } from "@/lib/api";
+import { getCategories, getProducts, type Category, type Paginated, type Product } from "@/lib/api";
+import { AdminProductRow } from "./AdminProductRow";
 
 const LIMIT = 20;
-const LOW_STOCK = 5;
 
 export function AdminProductTable() {
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<Paginated<Product> | null>(null);
   const [categories, setCategories] = useState<Map<string, string>>(new Map());
   const [error, setError] = useState<string | null>(null);
+  // Subirlo vuelve a pedir la página: la fuente de verdad sigue siendo el servidor.
+  const [version, setVersion] = useState(0);
+  const reload = () => setVersion((v) => v + 1);
 
   useEffect(() => {
     getCategories()
@@ -20,8 +23,14 @@ export function AdminProductTable() {
   }, []);
 
   useEffect(() => {
-    getProducts({ page, limit: LIMIT }).then(setResult).catch((e) => setError(e.message));
-  }, [page]);
+    getProducts({ page, limit: LIMIT })
+      .then((res) => {
+        // Se borró el último producto de la página: volver a la anterior.
+        if (res.data.length === 0 && page > 1) setPage(page - 1);
+        else setResult(res);
+      })
+      .catch((e) => setError(e.message));
+  }, [page, version]);
 
   if (error) return <p className="text-red-600">{error}</p>;
   if (!result) return <p>Cargando productos…</p>;
@@ -49,19 +58,12 @@ export function AdminProductTable() {
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {result.data.map((p) => (
-              <tr key={p.id}>
-                <td className="py-2 pr-4">
-                  <Link href={`/products/${p.id}`} className="hover:underline">{p.name}</Link>
-                </td>
-                <td className="py-2 pr-4">{categories.get(p.categoryId) ?? "—"}</td>
-                <td className="py-2 pr-4 text-right">{formatPrice(p.price)}</td>
-                <td className={`py-2 pr-4 text-right ${p.stock <= LOW_STOCK ? "font-semibold text-red-600" : ""}`}>
-                  {p.stock === 0 ? "Sin stock" : p.stock}
-                </td>
-                <td className="py-2 text-right">
-                  <Link href={`/admin/products/${p.id}/edit`} className="underline">Editar</Link>
-                </td>
-              </tr>
+              <AdminProductRow
+                key={p.id}
+                product={p}
+                categoryName={categories.get(p.categoryId)}
+                onChanged={reload}
+              />
             ))}
           </tbody>
         </table>
