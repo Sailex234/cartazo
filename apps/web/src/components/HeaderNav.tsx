@@ -23,6 +23,7 @@ export function HeaderNav() {
 
   return (
     <nav className="flex items-center gap-4 text-sm">
+      {user.role === "ADMIN" && <Link href="/admin" className="underline">Admin</Link>}
       <Link href="/cart" className="underline">Carrito</Link>
       <Link href="/orders" className="underline">Mis órdenes</Link>
       <span>Hola, {user.name}</span>
