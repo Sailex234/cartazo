@@ -1,9 +1,11 @@
 import type {
+  CreateCategoryInput,
   CreateProductInput,
   LoginInput,
   ProductQuery,
   PublicUser,
   RegisterInput,
+  UpdateCategoryInput,
   UpdateProductInput,
 } from "@cartazo/shared";
 
@@ -161,4 +163,16 @@ export async function updateProductStock(id: string, stock: number): Promise<Pro
 
 export function deleteProduct(id: string): Promise<void> {
   return request<void>(`/api/products/${id}`, { method: "DELETE" });
+}
+
+export async function createCategory(input: CreateCategoryInput): Promise<Category> {
+  return (await request<{ data: Category }>("/api/categories", { method: "POST", body: input })).data;
+}
+
+export async function updateCategory(id: string, input: UpdateCategoryInput): Promise<Category> {
+  return (await request<{ data: Category }>(`/api/categories/${id}`, { method: "PUT", body: input })).data;
+}
+
+export function deleteCategory(id: string): Promise<void> {
+  return request<void>(`/api/categories/${id}`, { method: "DELETE" });
 }
