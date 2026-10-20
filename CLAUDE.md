@@ -14,14 +14,14 @@ The project is being built in phases; check recent commits / ask the user for cu
 status before assuming a feature (auth, cart, payments, admin panel) already exists.
 
 **Current phase status** (2026-10-20): Phases 0-4 are done and committed, plus Phase 5 blocks
-1-3 and Phase 6 block 1 (admin base + inventory table). Phase 0 (scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod
+1-3 and Phase 6 blocks 1-2 (admin base + inventory table, product create/edit form). Phase 0 (scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod
 validation, centralized error handling), Phase 2 (Auth: register/login/logout/me, bcrypt, JWT in
 an httpOnly cookie, `requireAuth`/`requireRole('ADMIN')` guarding product/category writes), Phase 3
 (Cart, Orders, checkout with **MercadoPago**, not Stripe — Stripe doesn't support Argentina;
 webhook + order reconciliation), Phase 4 (Next.js catalog + product detail), Phase 5 block 1
 (login/register/session in the web) and block 2 (cart page, add-to-cart, checkout redirect,
 `/orders/[id]`) and block 3 (order history `/orders`), verified end-to-end in the MP sandbox.
-**Next: admin product create/edit form (Phase 6 block 2)**, then delete/stock/categories (block 3) — check with the user before building. No public
+**Next: admin delete / quick stock edit / category CRUD (Phase 6 block 3)** — check with the user before building. No public
 endpoint creates an ADMIN user (avoids privilege escalation via `/register`, which always
 creates `CLIENTE`) — the first admin is bootstrapped via `apps/api/prisma/seed.ts`
 (`admin@cartazo.com` / `admin12345`, change in any real environment).
@@ -115,4 +115,4 @@ error-handling middleware, producing one consistent JSON error shape. This is th
 for the legacy project's worst flaw — every old PHP endpoint had a different, often bare-string
 response shape.
 
-The admin panel so far has only `/admin/products` (read-only inventory table); its `AdminGuard` is a UX check, real protection is `requireRole('ADMIN')` in the API. Check with the user before building ahead of the current phase.
+The admin panel so far has `/admin/products` (inventory table) plus `/admin/products/new` and `/[id]/edit` (shared `ProductForm`); its `AdminGuard` is a UX check, real protection is `requireRole('ADMIN')` in the API. Check with the user before building ahead of the current phase.

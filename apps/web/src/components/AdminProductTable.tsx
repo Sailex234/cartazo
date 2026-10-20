@@ -30,7 +30,12 @@ export function AdminProductTable() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm">{result.meta.total} producto(s)</p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm">{result.meta.total} producto(s)</p>
+        <Link href="/admin/products/new" className="rounded-md bg-black px-3 py-1.5 text-sm text-white dark:bg-white dark:text-black">
+          Nuevo producto
+        </Link>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-zinc-200 dark:border-zinc-800">
@@ -38,7 +43,8 @@ export function AdminProductTable() {
               <th className="py-2 pr-4">Producto</th>
               <th className="py-2 pr-4">Categoría</th>
               <th className="py-2 pr-4 text-right">Precio</th>
-              <th className="py-2 text-right">Stock</th>
+              <th className="py-2 pr-4 text-right">Stock</th>
+              <th className="py-2" />
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -49,8 +55,11 @@ export function AdminProductTable() {
                 </td>
                 <td className="py-2 pr-4">{categories.get(p.categoryId) ?? "—"}</td>
                 <td className="py-2 pr-4 text-right">{formatPrice(p.price)}</td>
-                <td className={`py-2 text-right ${p.stock <= LOW_STOCK ? "font-semibold text-red-600" : ""}`}>
+                <td className={`py-2 pr-4 text-right ${p.stock <= LOW_STOCK ? "font-semibold text-red-600" : ""}`}>
                   {p.stock === 0 ? "Sin stock" : p.stock}
+                </td>
+                <td className="py-2 text-right">
+                  <Link href={`/admin/products/${p.id}/edit`} className="underline">Editar</Link>
                 </td>
               </tr>
             ))}

@@ -1,4 +1,11 @@
-import type { LoginInput, ProductQuery, PublicUser, RegisterInput } from "@cartazo/shared";
+import type {
+  CreateProductInput,
+  LoginInput,
+  ProductQuery,
+  PublicUser,
+  RegisterInput,
+  UpdateProductInput,
+} from "@cartazo/shared";
 
 // NEXT_PUBLIC_: la misma URL la usan los Server Components y el navegador (auth/carrito).
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -138,4 +145,12 @@ export async function getOrder(id: string): Promise<Order> {
 
 export async function getOrders(): Promise<Order[]> {
   return (await request<{ data: Order[] }>("/api/orders")).data;
+}
+
+export async function createProduct(input: CreateProductInput): Promise<Product> {
+  return (await request<{ data: Product }>("/api/products", { method: "POST", body: input })).data;
+}
+
+export async function updateProduct(id: string, input: UpdateProductInput): Promise<Product> {
+  return (await request<{ data: Product }>(`/api/products/${id}`, { method: "PUT", body: input })).data;
 }
