@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Postgres efímero solo para los tests de integración.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cartazo
+          POSTGRES_PASSWORD: cartazo
+          POSTGRES_DB: cartazo_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U cartazo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      TEST_DATABASE_URL: postgresql://cartazo:cartazo@localhost:5432/cartazo_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # El cliente de Prisma se genera a partir del schema; hace falta antes
+      # de typecheck/tests. prisma.config.ts exige DATABASE_URL aunque
+      # `generate` no se conecte.
+      - run: npx prisma generate
+        working-directory: apps/api
+        env:
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run test
+      - run: npm run test:integration --workspace=apps/api

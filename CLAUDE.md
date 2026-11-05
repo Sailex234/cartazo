@@ -13,15 +13,15 @@ enterprise-scale (no microservices, no k8s).
 The project is being built in phases; check recent commits / ask the user for current phase
 status before assuming a feature (auth, cart, payments, admin panel) already exists.
 
-**Current phase status** (2026-10-20): Phases 0-4 are done and committed, plus Phase 5 blocks
-1-3 and Phase 6 complete (admin: inventory table, product create/edit/delete, inline stock, category CRUD). Phase 0 (scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod
+**Current phase status** (2026-11-05): Phases 0-4 are done and committed, plus Phase 5 blocks
+1-3, Phase 6 complete (admin: inventory table, product create/edit/delete, inline stock, category CRUD) and Phase 7 (integration tests with supertest against a `cartazo_test` DB + GitHub Actions CI; `next build --webpack` works). Phase 0 (scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod
 validation, centralized error handling), Phase 2 (Auth: register/login/logout/me, bcrypt, JWT in
 an httpOnly cookie, `requireAuth`/`requireRole('ADMIN')` guarding product/category writes), Phase 3
 (Cart, Orders, checkout with **MercadoPago**, not Stripe — Stripe doesn't support Argentina;
 webhook + order reconciliation), Phase 4 (Next.js catalog + product detail), Phase 5 block 1
 (login/register/session in the web) and block 2 (cart page, add-to-cart, checkout redirect,
 `/orders/[id]`) and block 3 (order history `/orders`), verified end-to-end in the MP sandbox.
-**Next: Phase 7 — not defined yet; ask the user (candidates: tests/CI, deploy, polish)** — check with the user before building. No public
+**Next: Phase 8 — not defined yet; ask the user (candidates: deploy, polish)** — check with the user before building. No public
 endpoint creates an ADMIN user (avoids privilege escalation via `/register`, which always
 creates `CLIENTE`) — the first admin is bootstrapped via `apps/api/prisma/seed.ts`
 (`admin@cartazo.com` / `admin12345`, change in any real environment).
@@ -55,7 +55,8 @@ Run from the repo root (npm workspaces):
 npm run dev:api             # apps/api dev server (tsx watch), http://localhost:4000
 npm run dev:web              # apps/web dev server (Next.js), http://localhost:3001 (pinned; :3000 is taken by another local project)
 npm run build                 # build all workspaces
-npm run test                   # test all workspaces
+npm run test                   # unit tests of all workspaces (no DB)
+npm run test:integration --workspace=apps/api   # API integration tests; needs Postgres up, uses DB `cartazo_test` (created once: `docker exec <postgres> psql -U cartazo -d postgres -c "CREATE DATABASE cartazo_test;"`)
 npm run lint                    # lint all workspaces
 ```
 
