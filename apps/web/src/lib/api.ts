@@ -45,14 +45,21 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    method: init?.method,
-    // credentials: "include" hace que el navegador mande/reciba la cookie httpOnly del JWT
-    credentials: "include",
-    cache: "no-store",
-    headers: init?.body !== undefined ? { "Content-Type": "application/json" } : undefined,
-    body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: init?.method,
+      // credentials: "include" hace que el navegador mande/reciba la cookie httpOnly del JWT
+      credentials: "include",
+      cache: "no-store",
+      headers: init?.body !== undefined ? { "Content-Type": "application/json" } : undefined,
+      body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
+    });
+  } catch {
+    // API caída o sin red: fetch lanza un TypeError críptico ("Failed to fetch");
+    // se normaliza a un ApiError con mensaje legible, igual que cualquier otro error.
+    throw new ApiError("No se pudo conectar con el servidor. Probá de nuevo en unos instantes.", 0, "NETWORK_ERROR");
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new ApiError(body?.error?.message ?? res.statusText, res.status, body?.error?.code);
