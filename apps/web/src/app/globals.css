@@ -1,13 +1,35 @@
 @import "tailwindcss";
 
+/* Tokens de diseño: todo el color de la UI sale de acá, así claro/oscuro se
+   cambia en un solo lugar. Los pares fondo/texto cumplen contraste AA. */
 :root {
-  --background: #ffffff;
+  --background: #fafaf9;
   --foreground: #171717;
+  --surface: #ffffff;
+  --surface-muted: #f4f4f5;
+  --line: #e4e4e7;
+  --muted: #52525b;
+  --brand: #047857;
+  --brand-hover: #065f46;
+  --brand-fg: #ffffff;
+  --brand-soft: #d1fae5;
+  --brand-soft-fg: #064e3b;
+  --danger: #b91c1c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-soft-fg: var(--brand-soft-fg);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,6 +38,16 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --surface: #131315;
+    --surface-muted: #1c1c1f;
+    --line: #2a2a2e;
+    --muted: #a1a1aa;
+    --brand: #34d399;
+    --brand-hover: #6ee7b7;
+    --brand-fg: #022c22;
+    --brand-soft: #064e3b;
+    --brand-soft-fg: #a7f3d0;
+    --danger: #f87171;
   }
 }
 
@@ -35,5 +67,99 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse {
     animation: none;
+  }
+}
+
+
+/* Piezas reutilizables. Se combinan en el markup (p. ej. "btn btn-primary"):
+   en Tailwind v4 no se puede @apply una clase propia dentro de otra. */
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.625rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    transition: background-color 0.15s, border-color 0.15s, opacity 0.15s;
+    cursor: pointer;
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: var(--brand-fg);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--brand-hover);
+  }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--foreground);
+    border: 1px solid var(--line);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--surface-muted);
+  }
+  .btn-danger {
+    color: var(--danger);
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: var(--surface-muted);
+  }
+  .btn-sm {
+    padding: 0.25rem 0.75rem;
+  }
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  .input {
+    width: 100%;
+    border-radius: 0.625rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--foreground);
+  }
+  .input::placeholder {
+    color: var(--muted);
+  }
+  .card {
+    border-radius: 1rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--surface-muted);
+    color: var(--muted);
+  }
+  .badge-brand {
+    background: var(--brand-soft);
+    color: var(--brand-soft-fg);
+  }
+  .badge-danger {
+    color: var(--danger);
+  }
+  .link {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .link:hover {
+    color: var(--brand);
   }
 }

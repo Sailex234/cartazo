@@ -29,42 +29,72 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     return `/?${params}`;
   };
 
-  const input = "rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
+  const hasFilters = Boolean(filters.q || filters.category || filters.minPrice !== undefined || filters.maxPrice !== undefined);
+  const showHero = !hasFilters && page === 1;
+  const chip = (active: boolean) =>
+    `rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+      active ? "border-brand bg-brand text-brand-fg" : "border-line bg-surface hover:bg-surface-muted"
+    }`;
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="sr-only">Catálogo de productos</h1>
-      <form method="get" role="search" aria-label="Filtrar productos" className="flex flex-wrap items-end gap-3">
-        <input name="q" aria-label="Buscar productos" defaultValue={filters.q} placeholder="Buscar productos…" className={`${input} min-w-56 flex-1`} />
-        <select name="category" aria-label="Categoría" defaultValue={filters.category ?? ""} className={input}>
-          <option value="">Todas las categorías</option>
+    <div className="flex flex-col gap-8">
+      {showHero && (
+        <section className="rounded-3xl bg-brand-soft px-6 py-10 text-brand-soft-fg sm:px-10 sm:py-14">
+          <h1 className="max-w-xl text-3xl font-bold tracking-tight sm:text-5xl">Todo para tu despensa, en un solo lugar</h1>
+          <p className="mt-3 max-w-lg text-base sm:text-lg">
+            Almacén, bebidas, lácteos y más. Armá tu carrito y pagá seguro con MercadoPago.
+          </p>
+          <a href="#catalogo" className="btn btn-primary btn-lg mt-6">Ver productos</a>
+        </section>
+      )}
+
+      <section id="catalogo" aria-labelledby="catalogo-titulo" className="flex scroll-mt-20 flex-col gap-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="catalogo-titulo" className="text-2xl font-semibold tracking-tight">
+            {hasFilters ? "Resultados" : "Catálogo"}
+          </h2>
+          <p className="text-sm text-muted">{meta.total} producto(s)</p>
+        </div>
+
+        <nav aria-label="Categorías" className="flex flex-wrap gap-2">
+          <Link href="/" className={chip(!filters.category)}>Todas</Link>
           {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <Link key={c.id} href={`/?category=${c.id}#catalogo`} className={chip(filters.category === c.id)}>
+              {c.name}
+            </Link>
           ))}
-        </select>
-        <input name="minPrice" aria-label="Precio mínimo" type="number" min={0} defaultValue={filters.minPrice} placeholder="Mín" className={`${input} w-24`} />
-        <input name="maxPrice" aria-label="Precio máximo" type="number" min={0} defaultValue={filters.maxPrice} placeholder="Máx" className={`${input} w-24`} />
-        <button className="rounded-md bg-black px-4 py-2 text-white dark:bg-white dark:text-black">Filtrar</button>
-        <Link href="/" className="py-2 text-sm underline">Limpiar</Link>
-      </form>
-
-      {products.length === 0 ? (
-        <p className="py-16 text-center text-zinc-500 dark:text-zinc-400">No hay productos que coincidan.</p>
-      ) : (
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {products.map((p) => (
-            <li key={p.id}><ProductCard product={p} /></li>
-          ))}
-        </ul>
-      )}
-
-      {totalPages > 1 && (
-        <nav aria-label="Paginación" className="flex items-center justify-center gap-4">
-          {page > 1 && <Link href={pageHref(page - 1)} className="underline">← Anterior</Link>}
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">Página {page} de {totalPages}</span>
-          {page < totalPages && <Link href={pageHref(page + 1)} className="underline">Siguiente →</Link>}
         </nav>
-      )}
+
+        <form method="get" role="search" aria-label="Filtrar productos" className="card flex flex-wrap items-end gap-3 p-3">
+          {filters.category && <input type="hidden" name="category" value={filters.category} />}
+          <input name="q" aria-label="Buscar productos" defaultValue={filters.q} placeholder="Buscar productos…" className="input min-w-48 flex-1" />
+          <input name="minPrice" aria-label="Precio mínimo" type="number" min={0} defaultValue={filters.minPrice} placeholder="Mín $" className="input w-28" />
+          <input name="maxPrice" aria-label="Precio máximo" type="number" min={0} defaultValue={filters.maxPrice} placeholder="Máx $" className="input w-28" />
+          <button className="btn btn-primary">Filtrar</button>
+          {hasFilters && <Link href="/" className="btn btn-secondary">Limpiar</Link>}
+        </form>
+
+        {products.length === 0 ? (
+          <div className="card py-16 text-center">
+            <p className="text-lg font-medium">No encontramos productos con esos filtros</p>
+            <Link href="/" className="link mt-2 inline-block text-sm">Ver todo el catálogo</Link>
+          </div>
+        ) : (
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {products.map((p) => (
+              <li key={p.id}><ProductCard product={p} /></li>
+            ))}
+          </ul>
+        )}
+
+        {totalPages > 1 && (
+          <nav aria-label="Paginación" className="flex items-center justify-center gap-3">
+            {page > 1 && <Link href={pageHref(page - 1)} className="btn btn-secondary">← Anterior</Link>}
+            <span className="text-sm text-muted">Página {page} de {totalPages}</span>
+            {page < totalPages && <Link href={pageHref(page + 1)} className="btn btn-secondary">Siguiente →</Link>}
+          </nav>
+        )}
+      </section>
     </div>
   );
 }

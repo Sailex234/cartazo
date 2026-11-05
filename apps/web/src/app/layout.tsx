@@ -34,13 +34,27 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Saltar al contenido
         </a>
-        <header className="border-b border-zinc-200 dark:border-zinc-800">
-          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-4">
-            <Link href="/" className="text-xl font-bold tracking-tight">Cartazo</Link>
+        <header className="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+              <span
+                aria-hidden
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-base text-brand-fg"
+              >
+                C
+              </span>
+              Cartazo
+            </Link>
             <HeaderNav />
           </div>
         </header>
         <main id="contenido" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+        <footer className="mt-8 border-t border-line bg-surface">
+          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted">
+            <p>© {new Date().getFullYear()} Cartazo · Proyecto de portfolio</p>
+            <p>Pagos en modo prueba con MercadoPago</p>
+          </div>
+        </footer>
         </AuthProvider>
       </body>
     </html>
