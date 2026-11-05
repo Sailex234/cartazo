@@ -12,7 +12,7 @@ export function EditProduct({ id }: { id: string }) {
     getProduct(id).then(setProduct).catch((e) => setError(e.message));
   }, [id]);
 
-  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
+  if (error) return <p className="text-danger">{error}</p>;
   if (!product) return <p>Cargando producto…</p>;
   return <ProductForm product={product} />;
 }

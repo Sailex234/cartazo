@@ -32,8 +32,8 @@ export function AdminProductTable() {
       .catch((e) => setError(e.message));
   }, [page, version]);
 
-  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
-  if (!result) return <p>Cargando productos…</p>;
+  if (error) return <p className="text-danger">{error}</p>;
+  if (!result) return <p className="text-muted">Cargando productos…</p>;
 
   const pages = Math.max(1, Math.ceil(result.meta.total / LIMIT));
 
@@ -41,22 +41,22 @@ export function AdminProductTable() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm">{result.meta.total} producto(s)</p>
-        <Link href="/admin/products/new" className="rounded-md bg-black px-3 py-1.5 text-sm text-white dark:bg-white dark:text-black">
+        <Link href="/admin/products/new" className="btn btn-primary btn-sm">
           Nuevo producto
         </Link>
       </div>
-      <div className="overflow-x-auto">
+      <div className="card overflow-x-auto px-4">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 dark:border-zinc-800">
+          <thead className="border-b border-line">
             <tr>
-              <th scope="col" className="py-2 pr-4">Producto</th>
-              <th scope="col" className="py-2 pr-4">Categoría</th>
-              <th scope="col" className="py-2 pr-4 text-right">Precio</th>
-              <th scope="col" className="py-2 pr-4 text-right">Stock</th>
+              <th scope="col" className="py-3 pr-4 font-medium text-muted">Producto</th>
+              <th scope="col" className="py-3 pr-4 font-medium text-muted">Categoría</th>
+              <th scope="col" className="py-3 pr-4 text-right font-medium text-muted">Precio</th>
+              <th scope="col" className="py-3 pr-4 text-right font-medium text-muted">Stock</th>
               <th scope="col" className="py-2"><span className="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-line">
             {result.data.map((p) => (
               <AdminProductRow
                 key={p.id}
@@ -70,9 +70,9 @@ export function AdminProductTable() {
       </div>
       {pages > 1 && (
         <div className="flex items-center gap-4 text-sm" role="navigation" aria-label="Paginación">
-          <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="underline disabled:opacity-40">Anterior</button>
+          <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="btn btn-secondary btn-sm">Anterior</button>
           <span>Página {page} de {pages}</span>
-          <button disabled={page >= pages} onClick={() => setPage(page + 1)} className="underline disabled:opacity-40">Siguiente</button>
+          <button disabled={page >= pages} onClick={() => setPage(page + 1)} className="btn btn-secondary btn-sm">Siguiente</button>
         </div>
       )}
     </div>

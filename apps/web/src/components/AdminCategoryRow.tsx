@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createCategorySchema } from "@cartazo/shared";
 import { ApiError, deleteCategory, updateCategory, type Category } from "@/lib/api";
 
-const input = "rounded-md border border-zinc-300 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900";
+const input = "input";
 
 type Mode = "view" | "edit" | "confirmDelete";
 
@@ -44,10 +44,10 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
         {mode === "edit" ? (
           <td colSpan={3} className="py-2">
             <form onSubmit={save} className="flex flex-wrap items-center gap-2">
-              <input name="name" aria-label="Nombre" defaultValue={category.name} autoFocus className={input} />
-              <input name="slug" aria-label="Slug" defaultValue={category.slug} className={input} />
-              <button disabled={pending} className="underline disabled:opacity-50">Guardar</button>
-              <button type="button" onClick={() => { setError(null); setMode("view"); }} className="underline">
+              <input name="name" aria-label="Nombre" defaultValue={category.name} autoFocus className={`${input} !w-auto`} />
+              <input name="slug" aria-label="Slug" defaultValue={category.slug} className={`${input} !w-auto`} />
+              <button disabled={pending} className="link disabled:opacity-50">Guardar</button>
+              <button type="button" onClick={() => { setError(null); setMode("view"); }} className="link">
                 Cancelar
               </button>
             </form>
@@ -55,7 +55,7 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
         ) : (
           <>
             <td className="py-2 pr-4">{category.name}</td>
-            <td className="py-2 pr-4 text-zinc-500 dark:text-zinc-400">{category.slug}</td>
+            <td className="py-2 pr-4 text-muted">{category.slug}</td>
             <td className="py-2 text-right">
               {mode === "confirmDelete" ? (
                 <span className="flex items-center justify-end gap-2">
@@ -63,16 +63,16 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
                   <button
                     disabled={pending}
                     onClick={() => run(() => deleteCategory(category.id))}
-                    className="text-red-600 dark:text-red-400 underline disabled:opacity-50"
+                    className="link text-danger disabled:opacity-50"
                   >
                     Sí, borrar
                   </button>
-                  <button onClick={() => { setError(null); setMode("view"); }} className="underline">No</button>
+                  <button onClick={() => { setError(null); setMode("view"); }} className="link">No</button>
                 </span>
               ) : (
                 <span className="flex items-center justify-end gap-3">
-                  <button onClick={() => setMode("edit")} className="underline">Editar</button>
-                  <button onClick={() => setMode("confirmDelete")} className="text-red-600 dark:text-red-400 underline">Borrar</button>
+                  <button onClick={() => setMode("edit")} className="link">Editar</button>
+                  <button onClick={() => setMode("confirmDelete")} className="link text-danger">Borrar</button>
                 </span>
               )}
             </td>
@@ -81,7 +81,7 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
       </tr>
       {error && (
         <tr>
-          <td colSpan={3} role="alert" className="pb-2 text-sm text-red-600 dark:text-red-400">{error}</td>
+          <td colSpan={3} role="alert" className="pb-2 text-sm text-danger">{error}</td>
         </tr>
       )}
     </>

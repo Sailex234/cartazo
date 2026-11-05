@@ -5,7 +5,7 @@ import { createCategorySchema } from "@cartazo/shared";
 import { ApiError, createCategory, getCategories, type Category } from "@/lib/api";
 import { AdminCategoryRow } from "./AdminCategoryRow";
 
-const input = "rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900";
+const input = "input";
 
 // "Café en grano" -> "cafe-en-grano": sin tildes, minúsculas, separado por guiones.
 const slugify = (name: string) =>
@@ -55,38 +55,38 @@ export function AdminCategories() {
     }
   }
 
-  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
-  if (!categories) return <p>Cargando categorías…</p>;
+  if (error) return <p className="text-danger">{error}</p>;
+  if (!categories) return <p className="text-muted">Cargando categorías…</p>;
 
   return (
     <div className="flex flex-col gap-6">
-      <form onSubmit={onCreate} className="flex flex-col gap-2">
+      <form onSubmit={onCreate} className="card flex flex-col gap-2 p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <input name="name" aria-label="Nombre" placeholder="Nombre" className={input} />
-          <input name="slug" aria-label="Slug (opcional)" placeholder="slug (opcional)" className={input} />
+          <input name="name" aria-label="Nombre" placeholder="Nombre" className={`${input} !w-auto min-w-40 flex-1`} />
+          <input name="slug" aria-label="Slug (opcional)" placeholder="slug (opcional)" className={`${input} !w-auto min-w-40 flex-1`} />
           <button
             disabled={pending}
-            className="rounded-md bg-black px-3 py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
+            className="btn btn-primary btn-sm"
           >
             {pending ? "Creando…" : "Nueva categoría"}
           </button>
         </div>
-        {formError && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{formError}</p>}
+        {formError && <p role="alert" className="text-sm text-danger">{formError}</p>}
       </form>
 
       {categories.length === 0 ? (
-        <p>Todavía no hay categorías.</p>
+        <p className="text-muted">Todavía no hay categorías.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="card overflow-x-auto px-4">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 dark:border-zinc-800">
+          <thead className="border-b border-line">
             <tr>
-              <th scope="col" className="py-2 pr-4">Nombre</th>
-              <th scope="col" className="py-2 pr-4">Slug</th>
+              <th scope="col" className="py-3 pr-4 font-medium text-muted">Nombre</th>
+              <th scope="col" className="py-3 pr-4 font-medium text-muted">Slug</th>
               <th scope="col" className="py-2"><span className="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-line">
             {categories.map((c) => (
               <AdminCategoryRow key={c.id} category={c} onChanged={reload} />
             ))}

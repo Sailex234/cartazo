@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { createProductSchema } from "@cartazo/shared";
 import { ApiError, createProduct, getCategories, updateProduct, type Category, type Product } from "@/lib/api";
 
-const input = "rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
+const input = "input";
 
 // Sin `product` crea; con `product` edita. Mismo formulario para los dos casos.
 export function ProductForm({ product }: { product?: Product }) {
@@ -47,29 +47,29 @@ export function ProductForm({ product }: { product?: Product }) {
     }
   }
 
-  if (!categories) return <p>{error ? <span className="text-red-600 dark:text-red-400">{error}</span> : "Cargando…"}</p>;
+  if (!categories) return <p>{error ? <span className="text-danger">{error}</span> : "Cargando…"}</p>;
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-xl flex-col gap-4">
-      <label className="flex flex-col gap-1 text-sm">
+    <form onSubmit={onSubmit} className="card flex w-full max-w-xl flex-col gap-4 p-5 sm:p-6">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         Nombre
         <input name="name" defaultValue={product?.name} className={input} />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         Descripción
         <textarea name="description" rows={4} defaultValue={product?.description} className={input} />
       </label>
       <div className="grid grid-cols-2 gap-4">
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm font-medium">
           Precio (ARS)
           <input name="price" type="number" step="0.01" min="0" defaultValue={product?.price} className={input} />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm font-medium">
           Stock
           <input name="stock" type="number" step="1" min="0" defaultValue={product?.stock ?? 0} className={input} />
         </label>
       </div>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         Categoría
         <select name="categoryId" defaultValue={product?.categoryId ?? ""} className={input}>
           <option value="" disabled>Elegí una categoría</option>
@@ -78,22 +78,22 @@ export function ProductForm({ product }: { product?: Product }) {
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="flex flex-col gap-1 text-sm font-medium">
         URL de la imagen (opcional)
         <input name="imageUrl" type="url" defaultValue={product?.imageUrl ?? ""} className={input} />
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="text-xs font-normal text-muted">
           Solo se muestran hosts permitidos en <code>next.config.ts</code> (unsplash, picsum).
         </span>
       </label>
-      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       <div className="flex items-center gap-4">
         <button
           disabled={pending}
-          className="rounded-md bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+          className="btn btn-primary"
         >
           {pending ? "Guardando…" : product ? "Guardar cambios" : "Crear producto"}
         </button>
-        <Link href="/admin/products" className="text-sm underline">Cancelar</Link>
+        <Link href="/admin/products" className="btn btn-secondary">Cancelar</Link>
       </div>
     </form>
   );

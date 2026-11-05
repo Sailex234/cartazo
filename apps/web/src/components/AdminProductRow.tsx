@@ -48,11 +48,11 @@ export function AdminProductRow({
     <>
       <tr>
         <td className="py-2 pr-4">
-          <Link href={`/products/${product.id}`} className="hover:underline">{product.name}</Link>
+          <Link href={`/products/${product.id}`} className="font-medium hover:text-brand">{product.name}</Link>
         </td>
         <td className="py-2 pr-4">{categoryName ?? "—"}</td>
         <td className="py-2 pr-4 text-right">{formatPrice(product.price)}</td>
-        <td className={`py-2 pr-4 text-right ${product.stock <= LOW_STOCK ? "font-semibold text-red-600 dark:text-red-400" : ""}`}>
+        <td className={`py-2 pr-4 text-right ${product.stock <= LOW_STOCK ? "font-semibold text-danger" : ""}`}>
           {mode === "stock" ? (
             <form onSubmit={saveStock} className="flex items-center justify-end gap-2">
               <input
@@ -63,15 +63,15 @@ export function AdminProductRow({
                 step="1"
                 defaultValue={product.stock}
                 autoFocus
-                className="w-20 rounded-md border border-zinc-300 px-2 py-1 text-right font-normal text-foreground dark:border-zinc-700 dark:bg-zinc-900"
+                className="input !w-20 !px-2 !py-1 text-right font-normal"
               />
-              <button disabled={pending} className="underline disabled:opacity-50">Guardar</button>
-              <button type="button" onClick={() => setMode("view")} className="underline">Cancelar</button>
+              <button disabled={pending} className="link disabled:opacity-50">Guardar</button>
+              <button type="button" onClick={() => setMode("view")} className="link">Cancelar</button>
             </form>
           ) : (
             <>
               {product.stock === 0 ? "Sin stock" : product.stock}{" "}
-              <button onClick={() => setMode("stock")} className="font-normal text-foreground underline">Ajustar</button>
+              <button onClick={() => setMode("stock")} className="link font-normal text-foreground">Ajustar</button>
             </>
           )}
         </td>
@@ -82,23 +82,23 @@ export function AdminProductRow({
               <button
                 disabled={pending}
                 onClick={() => run(() => deleteProduct(product.id))}
-                className="text-red-600 dark:text-red-400 underline disabled:opacity-50"
+                className="link text-danger disabled:opacity-50"
               >
                 Sí, borrar
               </button>
-              <button onClick={() => setMode("view")} className="underline">No</button>
+              <button onClick={() => setMode("view")} className="link">No</button>
             </span>
           ) : (
             <span className="flex items-center justify-end gap-3">
-              <Link href={`/admin/products/${product.id}/edit`} className="underline">Editar</Link>
-              <button onClick={() => setMode("confirmDelete")} className="text-red-600 dark:text-red-400 underline">Borrar</button>
+              <Link href={`/admin/products/${product.id}/edit`} className="link">Editar</Link>
+              <button onClick={() => setMode("confirmDelete")} className="link text-danger">Borrar</button>
             </span>
           )}
         </td>
       </tr>
       {error && (
         <tr>
-          <td colSpan={5} role="alert" className="pb-2 text-sm text-red-600 dark:text-red-400">{error}</td>
+          <td colSpan={5} role="alert" className="pb-2 text-sm text-danger">{error}</td>
         </tr>
       )}
     </>
