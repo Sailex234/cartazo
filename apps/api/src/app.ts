@@ -1,6 +1,8 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import swaggerUi from "swagger-ui-express";
+import { openApiSpec } from "./docs/openapi.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { cartRouter } from "./routes/cart.routes.js";
 import { categoryRouter } from "./routes/category.routes.js";
@@ -23,6 +25,12 @@ app.use(cookieParser());
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
+
+// Documentación interactiva (Swagger UI) y la spec cruda en JSON.
+app.get("/api/docs.json", (_req, res) => {
+  res.json(openApiSpec);
+});
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec, { customSiteTitle: "Cartazo API" }));
 
 app.use("/api/auth", authRouter);
 app.use("/api/cart", cartRouter);
