@@ -7,7 +7,7 @@ import { loginSchema, registerSchema } from "@cartazo/shared";
 import { ApiError, login, register } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 
-const input = "rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
+const input = "input";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const isRegister = mode === "register";
@@ -45,8 +45,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-sm flex-col gap-4">
-      <h1 className="text-2xl font-semibold">{isRegister ? "Crear cuenta" : "Ingresar"}</h1>
+    <form onSubmit={onSubmit} className="card mx-auto flex w-full max-w-sm flex-col gap-4 p-6">
+      <h1 className="text-2xl font-bold tracking-tight">{isRegister ? "Crear cuenta" : "Ingresar"}</h1>
       {isRegister && <input name="name" aria-label="Nombre" placeholder="Nombre" autoComplete="name" className={input} />}
       <input name="email" type="email" aria-label="Email" placeholder="Email" autoComplete="email" className={input} />
       <input
@@ -57,16 +57,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         autoComplete={isRegister ? "new-password" : "current-password"}
         className={input}
       />
-      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       <button
         disabled={pending}
-        className="rounded-md bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+        className="btn btn-primary"
       >
         {pending ? "Enviando…" : isRegister ? "Crear cuenta" : "Ingresar"}
       </button>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="text-sm text-muted">
         {isRegister ? "¿Ya tenés cuenta? " : "¿No tenés cuenta? "}
-        <Link href={isRegister ? "/login" : "/register"} className="underline">
+        <Link href={isRegister ? "/login" : "/register"} className="link">
           {isRegister ? "Ingresar" : "Crear cuenta"}
         </Link>
       </p>

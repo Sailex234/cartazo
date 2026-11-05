@@ -12,7 +12,7 @@ export function AddToCartButton({ productId, disabled }: { productId: string; di
 
   if (!loading && !user) {
     return (
-      <Link href="/login" className="w-fit rounded-md bg-black px-6 py-3 text-white dark:bg-white dark:text-black">
+      <Link href="/login" className="btn btn-primary btn-lg w-fit">
         Ingresá para comprar
       </Link>
     );
@@ -36,13 +36,13 @@ export function AddToCartButton({ productId, disabled }: { productId: string; di
       <button
         onClick={onClick}
         disabled={disabled || pending || loading}
-        className="w-fit rounded-md bg-black px-6 py-3 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+        className="btn btn-primary btn-lg w-fit"
       >
         {pending ? "Agregando…" : "Agregar al carrito"}
       </button>
       {message && (
-        <p className={message.ok ? "text-sm text-green-700 dark:text-green-400" : "text-sm text-red-600 dark:text-red-400"} role="status">
-          {message.text} {message.ok && <Link href="/cart" className="underline">Ver carrito</Link>}
+        <p className={message.ok ? "text-sm text-brand" : "text-sm text-danger"} role="status">
+          {message.text} {message.ok && <Link href="/cart" className="link font-medium">Ver carrito</Link>}
         </p>
       )}
     </div>

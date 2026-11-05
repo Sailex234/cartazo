@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ApiError, checkout, formatPrice, getCart, removeCartItem, updateCartItem, type Cart } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
+import { EmptyState } from "./EmptyState";
+import { ProductImage } from "./ProductImage";
 
 export function CartView() {
   const { user, loading: authLoading } = useAuth();
@@ -16,21 +18,13 @@ export function CartView() {
     getCart().then(setCart).catch((e) => setError(e.message));
   }, [user]);
 
-  if (authLoading) return <p>Cargando…</p>;
+  if (authLoading) return <p className="text-muted">Cargando…</p>;
   if (!user) {
-    return (
-      <p>
-        <Link href="/login" className="underline">Ingresá</Link> para ver tu carrito.
-      </p>
-    );
+    return <EmptyState title="Ingresá para ver tu carrito" href="/login" action="Ingresar" />;
   }
-  if (!cart) return <p>{error ?? "Cargando carrito…"}</p>;
+  if (!cart) return <p className={error ? "text-danger" : "text-muted"}>{error ?? "Cargando carrito…"}</p>;
   if (cart.items.length === 0) {
-    return (
-      <p>
-        Tu carrito está vacío. <Link href="/" className="underline">Ver catálogo</Link>
-      </p>
-    );
+    return <EmptyState title="Tu carrito está vacío" text="Sumá productos desde el catálogo." href="/" action="Ver catálogo" />;
   }
 
   const total = cart.items.reduce((sum, i) => sum + Number(i.product.price) * i.quantity, 0);
@@ -60,47 +54,55 @@ export function CartView() {
     }
   };
 
+  const units = cart.items.reduce((n, i) => n + i.quantity, 0);
+
   return (
-    <div className="flex flex-col gap-6">
-      <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+    <div className="grid items-start gap-6 lg:grid-cols-[1fr_20rem]">
+      <ul className="card flex flex-col divide-y divide-line px-4">
         {cart.items.map(({ id, productId, quantity, product }) => (
-          <li key={id} className="flex flex-wrap items-center justify-between gap-4 py-4">
-            <div>
-              <Link href={`/products/${productId}`} className="font-medium underline">{product.name}</Link>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">{formatPrice(product.price)} c/u</p>
+          <li key={id} className="flex flex-wrap items-center gap-4 py-4">
+            <div className="w-20 shrink-0">
+              <ProductImage src={product.imageUrl} alt={product.name} sizes="80px" />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="min-w-40 flex-1">
+              <Link href={`/products/${productId}`} className="font-medium hover:text-brand">{product.name}</Link>
+              <p className="text-sm text-muted">{formatPrice(product.price)} c/u</p>
+              <button disabled={busy} onClick={() => run(() => removeCartItem(productId))} className="link mt-1 py-1 text-sm text-muted">
+                Quitar
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 aria-label="Menos"
                 disabled={busy || quantity <= 1}
                 onClick={() => run(() => updateCartItem(productId, quantity - 1))}
-                className="h-10 w-10 rounded-md border disabled:opacity-50"
+                className="btn btn-secondary h-10 w-10 !p-0"
               >−</button>
-              <span aria-live="polite" aria-label={`Cantidad: ${quantity}`}>{quantity}</span>
+              <span aria-live="polite" aria-label={`Cantidad: ${quantity}`} className="w-8 text-center font-medium">{quantity}</span>
               <button
                 aria-label="Más"
                 disabled={busy || quantity >= product.stock}
                 onClick={() => run(() => updateCartItem(productId, quantity + 1))}
-                className="h-10 w-10 rounded-md border disabled:opacity-50"
+                className="btn btn-secondary h-10 w-10 !p-0"
               >+</button>
-              <button disabled={busy} onClick={() => run(() => removeCartItem(productId))} className="py-2 text-sm underline">
-                Quitar
-              </button>
             </div>
+            <p className="w-28 text-right font-semibold">{formatPrice(String(Number(product.price) * quantity))}</p>
           </li>
         ))}
       </ul>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-xl font-semibold">Total: {formatPrice(String(total))}</p>
-        <button
-          onClick={pay}
-          disabled={busy}
-          className="rounded-md bg-black px-6 py-3 text-white disabled:opacity-50 dark:bg-white dark:text-black"
-        >
-          Pagar con MercadoPago
-        </button>
-      </div>
-      {error && <p className="text-sm text-red-600 dark:text-red-400" role="alert">{error}</p>}
+      <aside className="card flex flex-col gap-4 p-5 lg:sticky lg:top-24" aria-label="Resumen de la compra">
+        <h2 className="text-lg font-semibold">Resumen</h2>
+        <div className="flex justify-between text-sm text-muted">
+          <span>{units} producto(s)</span>
+          <span>{formatPrice(String(total))}</span>
+        </div>
+        <div className="flex items-baseline justify-between border-t border-line pt-4">
+          <span className="font-medium">Total</span>
+          <span className="text-2xl font-bold">{formatPrice(String(total))}</span>
+        </div>
+        <button onClick={pay} disabled={busy} className="btn btn-primary btn-lg">Pagar con MercadoPago</button>
+        {error && <p className="text-sm text-danger" role="alert">{error}</p>}
+      </aside>
     </div>
   );
 }

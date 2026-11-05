@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthProvider>
         <a
           href="#contenido"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-10 focus:rounded-md focus:bg-black focus:px-3 focus:py-2 focus:text-white dark:focus:bg-white dark:focus:text-black"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-10 focus:rounded-md focus:bg-brand focus:px-3 focus:py-2 focus:text-brand-fg"
         >
           Saltar al contenido
         </a>

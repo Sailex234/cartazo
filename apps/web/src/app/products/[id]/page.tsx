@@ -25,15 +25,23 @@ export default async function ProductPage({ params }: PageProps<"/products/[id]"
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/" className="text-sm underline">← Volver al catálogo</Link>
-      <div className="grid gap-8 md:grid-cols-2">
+      <nav aria-label="Ruta" className="text-sm text-muted">
+        <Link href="/" className="link">Catálogo</Link> <span aria-hidden>/</span> <span className="text-foreground">{product.name}</span>
+      </nav>
+      <div className="card grid gap-8 p-4 sm:p-6 md:grid-cols-2">
         <ProductImage src={product.imageUrl} alt={product.name} sizes="(min-width: 768px) 50vw, 100vw" />
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl font-semibold">{product.name}</h1>
-          <p className="text-2xl font-semibold">{formatPrice(product.price)}</p>
-          <p className="text-zinc-600 dark:text-zinc-400">{product.description}</p>
-          <p className={product.stock > 0 ? "text-sm text-green-700 dark:text-green-400" : "text-sm text-red-600 dark:text-red-400"}>
-            {product.stock > 0 ? `${product.stock} en stock` : "Sin stock"}
+          <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
+          <p className="text-3xl font-semibold">{formatPrice(product.price)}</p>
+          <p className="leading-relaxed text-muted">{product.description}</p>
+          <p>
+            {product.stock === 0 ? (
+              <span className="badge badge-danger">Sin stock</span>
+            ) : product.stock <= 5 ? (
+              <span className="badge">¡Últimas {product.stock} unidades!</span>
+            ) : (
+              <span className="badge badge-brand">{product.stock} en stock</span>
+            )}
           </p>
           <AddToCartButton productId={product.id} disabled={product.stock === 0} />
         </div>

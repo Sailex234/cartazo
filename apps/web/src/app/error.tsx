@@ -17,17 +17,12 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="py-16 text-center" role="alert">
-      <h1 className="text-2xl font-semibold">Algo salió mal</h1>
-      <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+    <div role="alert" className="card flex flex-col items-center gap-2 px-6 py-14 text-center">
+      <h1 className="text-lg font-semibold">Algo salió mal</h1>
+      <p className="max-w-sm text-sm text-muted">
         No pudimos cargar esta página. Puede ser un problema momentáneo con el servidor.
       </p>
-      <button
-        onClick={() => retry()}
-        className="mt-6 rounded-md bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
-      >
-        Reintentar
-      </button>
+      <button onClick={() => retry()} className="btn btn-primary mt-3">Reintentar</button>
     </div>
   );
 }
