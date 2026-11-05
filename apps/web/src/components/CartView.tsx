@@ -74,23 +74,23 @@ export function CartView() {
                 aria-label="Menos"
                 disabled={busy || quantity <= 1}
                 onClick={() => run(() => updateCartItem(productId, quantity - 1))}
-                className="h-8 w-8 rounded-md border disabled:opacity-50"
+                className="h-10 w-10 rounded-md border disabled:opacity-50"
               >−</button>
-              <span aria-live="polite">{quantity}</span>
+              <span aria-live="polite" aria-label={`Cantidad: ${quantity}`}>{quantity}</span>
               <button
                 aria-label="Más"
                 disabled={busy || quantity >= product.stock}
                 onClick={() => run(() => updateCartItem(productId, quantity + 1))}
-                className="h-8 w-8 rounded-md border disabled:opacity-50"
+                className="h-10 w-10 rounded-md border disabled:opacity-50"
               >+</button>
-              <button disabled={busy} onClick={() => run(() => removeCartItem(productId))} className="text-sm underline">
+              <button disabled={busy} onClick={() => run(() => removeCartItem(productId))} className="py-2 text-sm underline">
                 Quitar
               </button>
             </div>
           </li>
         ))}
       </ul>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-xl font-semibold">Total: {formatPrice(String(total))}</p>
         <button
           onClick={pay}
@@ -100,7 +100,7 @@ export function CartView() {
           Pagar con MercadoPago
         </button>
       </div>
-      {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400" role="alert">{error}</p>}
     </div>
   );
 }

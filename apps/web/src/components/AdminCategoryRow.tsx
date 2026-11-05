@@ -44,8 +44,8 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
         {mode === "edit" ? (
           <td colSpan={3} className="py-2">
             <form onSubmit={save} className="flex flex-wrap items-center gap-2">
-              <input name="name" defaultValue={category.name} autoFocus className={input} />
-              <input name="slug" defaultValue={category.slug} className={input} />
+              <input name="name" aria-label="Nombre" defaultValue={category.name} autoFocus className={input} />
+              <input name="slug" aria-label="Slug" defaultValue={category.slug} className={input} />
               <button disabled={pending} className="underline disabled:opacity-50">Guardar</button>
               <button type="button" onClick={() => { setError(null); setMode("view"); }} className="underline">
                 Cancelar
@@ -55,7 +55,7 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
         ) : (
           <>
             <td className="py-2 pr-4">{category.name}</td>
-            <td className="py-2 pr-4 text-zinc-500">{category.slug}</td>
+            <td className="py-2 pr-4 text-zinc-500 dark:text-zinc-400">{category.slug}</td>
             <td className="py-2 text-right">
               {mode === "confirmDelete" ? (
                 <span className="flex items-center justify-end gap-2">
@@ -63,7 +63,7 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
                   <button
                     disabled={pending}
                     onClick={() => run(() => deleteCategory(category.id))}
-                    className="text-red-600 underline disabled:opacity-50"
+                    className="text-red-600 dark:text-red-400 underline disabled:opacity-50"
                   >
                     Sí, borrar
                   </button>
@@ -72,7 +72,7 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
               ) : (
                 <span className="flex items-center justify-end gap-3">
                   <button onClick={() => setMode("edit")} className="underline">Editar</button>
-                  <button onClick={() => setMode("confirmDelete")} className="text-red-600 underline">Borrar</button>
+                  <button onClick={() => setMode("confirmDelete")} className="text-red-600 dark:text-red-400 underline">Borrar</button>
                 </span>
               )}
             </td>
@@ -81,7 +81,7 @@ export function AdminCategoryRow({ category, onChanged }: { category: Category; 
       </tr>
       {error && (
         <tr>
-          <td colSpan={3} role="alert" className="pb-2 text-sm text-red-600">{error}</td>
+          <td colSpan={3} role="alert" className="pb-2 text-sm text-red-600 dark:text-red-400">{error}</td>
         </tr>
       )}
     </>

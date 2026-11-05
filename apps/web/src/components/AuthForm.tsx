@@ -47,23 +47,24 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   return (
     <form onSubmit={onSubmit} className="mx-auto flex w-full max-w-sm flex-col gap-4">
       <h1 className="text-2xl font-semibold">{isRegister ? "Crear cuenta" : "Ingresar"}</h1>
-      {isRegister && <input name="name" placeholder="Nombre" autoComplete="name" className={input} />}
-      <input name="email" type="email" placeholder="Email" autoComplete="email" className={input} />
+      {isRegister && <input name="name" aria-label="Nombre" placeholder="Nombre" autoComplete="name" className={input} />}
+      <input name="email" type="email" aria-label="Email" placeholder="Email" autoComplete="email" className={input} />
       <input
         name="password"
         type="password"
+        aria-label="Contraseña"
         placeholder={isRegister ? "Contraseña (mín. 8 caracteres)" : "Contraseña"}
         autoComplete={isRegister ? "new-password" : "current-password"}
         className={input}
       />
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       <button
         disabled={pending}
         className="rounded-md bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
       >
         {pending ? "Enviando…" : isRegister ? "Crear cuenta" : "Ingresar"}
       </button>
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
         {isRegister ? "¿Ya tenés cuenta? " : "¿No tenés cuenta? "}
         <Link href={isRegister ? "/login" : "/register"} className="underline">
           {isRegister ? "Ingresar" : "Crear cuenta"}

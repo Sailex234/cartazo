@@ -52,11 +52,12 @@ export function AdminProductRow({
         </td>
         <td className="py-2 pr-4">{categoryName ?? "—"}</td>
         <td className="py-2 pr-4 text-right">{formatPrice(product.price)}</td>
-        <td className={`py-2 pr-4 text-right ${product.stock <= LOW_STOCK ? "font-semibold text-red-600" : ""}`}>
+        <td className={`py-2 pr-4 text-right ${product.stock <= LOW_STOCK ? "font-semibold text-red-600 dark:text-red-400" : ""}`}>
           {mode === "stock" ? (
             <form onSubmit={saveStock} className="flex items-center justify-end gap-2">
               <input
                 name="stock"
+                aria-label={`Stock de ${product.name}`}
                 type="number"
                 min="0"
                 step="1"
@@ -81,7 +82,7 @@ export function AdminProductRow({
               <button
                 disabled={pending}
                 onClick={() => run(() => deleteProduct(product.id))}
-                className="text-red-600 underline disabled:opacity-50"
+                className="text-red-600 dark:text-red-400 underline disabled:opacity-50"
               >
                 Sí, borrar
               </button>
@@ -90,14 +91,14 @@ export function AdminProductRow({
           ) : (
             <span className="flex items-center justify-end gap-3">
               <Link href={`/admin/products/${product.id}/edit`} className="underline">Editar</Link>
-              <button onClick={() => setMode("confirmDelete")} className="text-red-600 underline">Borrar</button>
+              <button onClick={() => setMode("confirmDelete")} className="text-red-600 dark:text-red-400 underline">Borrar</button>
             </span>
           )}
         </td>
       </tr>
       {error && (
         <tr>
-          <td colSpan={5} role="alert" className="pb-2 text-sm text-red-600">{error}</td>
+          <td colSpan={5} role="alert" className="pb-2 text-sm text-red-600 dark:text-red-400">{error}</td>
         </tr>
       )}
     </>

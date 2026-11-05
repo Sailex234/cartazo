@@ -32,7 +32,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[id]"
           <h1 className="text-3xl font-semibold">{product.name}</h1>
           <p className="text-2xl font-semibold">{formatPrice(product.price)}</p>
           <p className="text-zinc-600 dark:text-zinc-400">{product.description}</p>
-          <p className={product.stock > 0 ? "text-sm text-green-700" : "text-sm text-red-600"}>
+          <p className={product.stock > 0 ? "text-sm text-green-700 dark:text-green-400" : "text-sm text-red-600 dark:text-red-400"}>
             {product.stock > 0 ? `${product.stock} en stock` : "Sin stock"}
           </p>
           <AddToCartButton productId={product.id} disabled={product.stock === 0} />

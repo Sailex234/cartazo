@@ -41,7 +41,7 @@ export function AddToCartButton({ productId, disabled }: { productId: string; di
         {pending ? "Agregando…" : "Agregar al carrito"}
       </button>
       {message && (
-        <p className={message.ok ? "text-sm text-green-700" : "text-sm text-red-600"} role="status">
+        <p className={message.ok ? "text-sm text-green-700 dark:text-green-400" : "text-sm text-red-600 dark:text-red-400"} role="status">
           {message.text} {message.ok && <Link href="/cart" className="underline">Ver carrito</Link>}
         </p>
       )}

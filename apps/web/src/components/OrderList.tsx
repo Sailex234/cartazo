@@ -18,7 +18,7 @@ export function OrderList() {
 
   if (loading) return <p>Cargando…</p>;
   if (!user) return <p><Link href="/login" className="underline">Ingresá</Link> para ver tus órdenes.</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
   if (!orders) return <p>Cargando órdenes…</p>;
   if (orders.length === 0) {
     return <p>Todavía no hiciste compras. <Link href="/" className="underline">Ver catálogo</Link></p>;

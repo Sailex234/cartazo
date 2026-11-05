@@ -55,15 +55,15 @@ export function AdminCategories() {
     }
   }
 
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
   if (!categories) return <p>Cargando categorías…</p>;
 
   return (
     <div className="flex flex-col gap-6">
       <form onSubmit={onCreate} className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <input name="name" placeholder="Nombre" className={input} />
-          <input name="slug" placeholder="slug (opcional)" className={input} />
+          <input name="name" aria-label="Nombre" placeholder="Nombre" className={input} />
+          <input name="slug" aria-label="Slug (opcional)" placeholder="slug (opcional)" className={input} />
           <button
             disabled={pending}
             className="rounded-md bg-black px-3 py-2 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
@@ -71,18 +71,19 @@ export function AdminCategories() {
             {pending ? "Creando…" : "Nueva categoría"}
           </button>
         </div>
-        {formError && <p role="alert" className="text-sm text-red-600">{formError}</p>}
+        {formError && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{formError}</p>}
       </form>
 
       {categories.length === 0 ? (
         <p>Todavía no hay categorías.</p>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-zinc-200 dark:border-zinc-800">
             <tr>
-              <th className="py-2 pr-4">Nombre</th>
-              <th className="py-2 pr-4">Slug</th>
-              <th className="py-2" />
+              <th scope="col" className="py-2 pr-4">Nombre</th>
+              <th scope="col" className="py-2 pr-4">Slug</th>
+              <th scope="col" className="py-2"><span className="sr-only">Acciones</span></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -91,6 +92,7 @@ export function AdminCategories() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

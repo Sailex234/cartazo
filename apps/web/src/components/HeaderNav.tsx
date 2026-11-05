@@ -12,7 +12,7 @@ export function HeaderNav() {
 
   if (!user) {
     return (
-      <nav className="flex items-center gap-4 text-sm">
+      <nav aria-label="Principal" className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
         <Link href="/login" className="underline">Ingresar</Link>
         <Link href="/register" className="rounded-md bg-black px-3 py-1.5 text-white dark:bg-white dark:text-black">
           Crear cuenta
@@ -22,11 +22,11 @@ export function HeaderNav() {
   }
 
   return (
-    <nav className="flex items-center gap-4 text-sm">
+    <nav aria-label="Principal" className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
       {user.role === "ADMIN" && <Link href="/admin" className="underline">Admin</Link>}
       <Link href="/cart" className="underline">Carrito</Link>
       <Link href="/orders" className="underline">Mis órdenes</Link>
-      <span>Hola, {user.name}</span>
+      <span className="hidden sm:inline">Hola, {user.name}</span>
       <button
         onClick={async () => {
           await logout();

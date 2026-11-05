@@ -32,14 +32,14 @@ export function AdminProductTable() {
       .catch((e) => setError(e.message));
   }, [page, version]);
 
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
   if (!result) return <p>Cargando productos…</p>;
 
   const pages = Math.max(1, Math.ceil(result.meta.total / LIMIT));
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm">{result.meta.total} producto(s)</p>
         <Link href="/admin/products/new" className="rounded-md bg-black px-3 py-1.5 text-sm text-white dark:bg-white dark:text-black">
           Nuevo producto
@@ -49,11 +49,11 @@ export function AdminProductTable() {
         <table className="w-full text-left text-sm">
           <thead className="border-b border-zinc-200 dark:border-zinc-800">
             <tr>
-              <th className="py-2 pr-4">Producto</th>
-              <th className="py-2 pr-4">Categoría</th>
-              <th className="py-2 pr-4 text-right">Precio</th>
-              <th className="py-2 pr-4 text-right">Stock</th>
-              <th className="py-2" />
+              <th scope="col" className="py-2 pr-4">Producto</th>
+              <th scope="col" className="py-2 pr-4">Categoría</th>
+              <th scope="col" className="py-2 pr-4 text-right">Precio</th>
+              <th scope="col" className="py-2 pr-4 text-right">Stock</th>
+              <th scope="col" className="py-2"><span className="sr-only">Acciones</span></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -69,7 +69,7 @@ export function AdminProductTable() {
         </table>
       </div>
       {pages > 1 && (
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm" role="navigation" aria-label="Paginación">
           <button disabled={page <= 1} onClick={() => setPage(page - 1)} className="underline disabled:opacity-40">Anterior</button>
           <span>Página {page} de {pages}</span>
           <button disabled={page >= pages} onClick={() => setPage(page + 1)} className="underline disabled:opacity-40">Siguiente</button>

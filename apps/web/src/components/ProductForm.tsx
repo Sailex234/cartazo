@@ -47,7 +47,7 @@ export function ProductForm({ product }: { product?: Product }) {
     }
   }
 
-  if (!categories) return <p>{error ? <span className="text-red-600">{error}</span> : "Cargando…"}</p>;
+  if (!categories) return <p>{error ? <span className="text-red-600 dark:text-red-400">{error}</span> : "Cargando…"}</p>;
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-xl flex-col gap-4">
@@ -81,11 +81,11 @@ export function ProductForm({ product }: { product?: Product }) {
       <label className="flex flex-col gap-1 text-sm">
         URL de la imagen (opcional)
         <input name="imageUrl" type="url" defaultValue={product?.imageUrl ?? ""} className={input} />
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400">
           Solo se muestran hosts permitidos en <code>next.config.ts</code> (unsplash, picsum).
         </span>
       </label>
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       <div className="flex items-center gap-4">
         <button
           disabled={pending}

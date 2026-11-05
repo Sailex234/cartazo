@@ -28,13 +28,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-10 focus:rounded-md focus:bg-black focus:px-3 focus:py-2 focus:text-white dark:focus:bg-white dark:focus:text-black"
+        >
+          Saltar al contenido
+        </a>
         <header className="border-b border-zinc-200 dark:border-zinc-800">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
+          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-4">
             <Link href="/" className="text-xl font-bold tracking-tight">Cartazo</Link>
             <HeaderNav />
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+        <main id="contenido" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
         </AuthProvider>
       </body>
     </html>

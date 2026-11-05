@@ -33,22 +33,23 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <form method="get" className="flex flex-wrap items-end gap-3">
-        <input name="q" defaultValue={filters.q} placeholder="Buscar productos…" className={`${input} min-w-56 flex-1`} />
-        <select name="category" defaultValue={filters.category ?? ""} className={input}>
+      <h1 className="sr-only">Catálogo de productos</h1>
+      <form method="get" role="search" aria-label="Filtrar productos" className="flex flex-wrap items-end gap-3">
+        <input name="q" aria-label="Buscar productos" defaultValue={filters.q} placeholder="Buscar productos…" className={`${input} min-w-56 flex-1`} />
+        <select name="category" aria-label="Categoría" defaultValue={filters.category ?? ""} className={input}>
           <option value="">Todas las categorías</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
-        <input name="minPrice" type="number" min={0} defaultValue={filters.minPrice} placeholder="Mín" className={`${input} w-24`} />
-        <input name="maxPrice" type="number" min={0} defaultValue={filters.maxPrice} placeholder="Máx" className={`${input} w-24`} />
+        <input name="minPrice" aria-label="Precio mínimo" type="number" min={0} defaultValue={filters.minPrice} placeholder="Mín" className={`${input} w-24`} />
+        <input name="maxPrice" aria-label="Precio máximo" type="number" min={0} defaultValue={filters.maxPrice} placeholder="Máx" className={`${input} w-24`} />
         <button className="rounded-md bg-black px-4 py-2 text-white dark:bg-white dark:text-black">Filtrar</button>
         <Link href="/" className="py-2 text-sm underline">Limpiar</Link>
       </form>
 
       {products.length === 0 ? (
-        <p className="py-16 text-center text-zinc-500">No hay productos que coincidan.</p>
+        <p className="py-16 text-center text-zinc-500 dark:text-zinc-400">No hay productos que coincidan.</p>
       ) : (
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => (
@@ -58,9 +59,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       )}
 
       {totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-4">
+        <nav aria-label="Paginación" className="flex items-center justify-center gap-4">
           {page > 1 && <Link href={pageHref(page - 1)} className="underline">← Anterior</Link>}
-          <span className="text-sm text-zinc-500">Página {page} de {totalPages}</span>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400">Página {page} de {totalPages}</span>
           {page < totalPages && <Link href={pageHref(page + 1)} className="underline">Siguiente →</Link>}
         </nav>
       )}

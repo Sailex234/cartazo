@@ -19,7 +19,7 @@ export default function Error({
   return (
     <div className="py-16 text-center" role="alert">
       <h1 className="text-2xl font-semibold">Algo salió mal</h1>
-      <p className="mt-2 text-zinc-500">
+      <p className="mt-2 text-zinc-500 dark:text-zinc-400">
         No pudimos cargar esta página. Puede ser un problema momentáneo con el servidor.
       </p>
       <button

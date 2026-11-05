@@ -16,7 +16,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div>
         <h2 className="font-medium group-hover:underline">{product.name}</h2>
         <p className="text-lg font-semibold">{formatPrice(product.price)}</p>
-        {product.stock === 0 && <p className="text-sm text-red-600">Sin stock</p>}
+        {product.stock === 0 && <p className="text-sm text-red-600 dark:text-red-400">Sin stock</p>}
       </div>
     </Link>
   );

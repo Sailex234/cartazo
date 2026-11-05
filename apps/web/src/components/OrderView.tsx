@@ -32,7 +32,7 @@ export function OrderView({ id }: { id: string }) {
 
   if (loading) return <p>Cargando…</p>;
   if (!user) return <p><Link href="/login" className="underline">Ingresá</Link> para ver tu orden.</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
   if (!order) return <p>Cargando orden…</p>;
 
   return (
