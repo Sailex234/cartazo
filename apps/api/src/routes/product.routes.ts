@@ -11,6 +11,7 @@ import { validate } from "../middleware/validate.js";
 import { catchAsync } from "../middleware/catchAsync.js";
 import { requireAuth, requireRole } from "../middleware/auth.middleware.js";
 import { uploadImage } from "../middleware/upload.js";
+import { uploadLimiter } from "../middleware/rateLimit.js";
 
 export const productRouter = Router();
 
@@ -64,6 +65,7 @@ productRouter.put(
   requireAuth,
   requireRole("ADMIN"),
   validate({ params: productIdParamsSchema }),
+  uploadLimiter,
   uploadImage,
   catchAsync(productController.setImage),
 );

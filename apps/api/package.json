@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
+    "start": "tsx src/index.ts",
     "test": "vitest run",
     "lint": "eslint src",
     "test:integration": "vitest run --config vitest.integration.config.ts"
@@ -20,6 +20,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.7.4",
     "jsonwebtoken": "^9.0.3",
     "mercadopago": "^3.6.1",
     "multer": "^2.5.0",

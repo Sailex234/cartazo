@@ -1,0 +1,31 @@
+# Blueprint de Render para la API de la demo pública (el frontend va en Vercel).
+# Las variables con sync:false se cargan a mano en el dashboard (secretos o datos que no existen aún).
+services:
+  - type: web
+    name: cartazo-api
+    runtime: node
+    region: oregon
+    plan: free
+    healthCheckPath: /health
+    # --include=dev: la API corre con tsx (devDependency) porque @cartazo/shared se consume como fuente .ts.
+    buildCommand: npm ci --include=dev && cd apps/api && npx prisma generate
+    startCommand: npm run start --workspace=apps/api
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      # URL "pooled" de Neon (host con -pooler). Las migraciones se corren aparte con la URL directa.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      # URL pública de la web en Vercel (para CORS y para las back_urls de MercadoPago).
+      - key: WEB_ORIGIN
+        sync: false
+      - key: MP_ACCESS_TOKEN
+        sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false
+      - key: MP_NOTIFICATION_URL
+        value: https://cartazo-api.onrender.com/api/webhooks/mercadopago

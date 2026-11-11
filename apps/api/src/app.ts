@@ -12,8 +12,12 @@ import { webhookRouter } from "./routes/webhook.routes.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { env } from "./config/env.js";
+import { generalLimiter } from "./middleware/rateLimit.js";
 
 export const app = express();
+
+// Detrás del proxy de Render/Vercel: sin esto req.ip es la IP del proxy y el rate limit cuenta a todos como uno.
+app.set("trust proxy", 1);
 
 // credentials:true + origin explícito (no "*") son necesarios para que el
 // browser mande/reciba la cookie httpOnly del JWT cross-origin (api en :4000,
@@ -32,6 +36,7 @@ app.get("/api/docs.json", (_req, res) => {
 });
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec, { customSiteTitle: "Cartazo API" }));
 
+app.use("/api", generalLimiter);
 app.use("/api/auth", authRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/categories", categoryRouter);
