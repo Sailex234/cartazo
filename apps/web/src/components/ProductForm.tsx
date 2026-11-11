@@ -22,9 +22,14 @@ export function ProductForm({ product }: { product?: Product }) {
   async function onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const data: Record<string, unknown> = Object.fromEntries(new FormData(e.currentTarget));
     // Un input vacío llega como "": el schema espera que imageUrl falte, no que sea "".
     if (data.imageUrl === "") delete data.imageUrl;
+    // Precio anterior vacío: al editar se manda null (borra la oferta); al crear, simplemente no va.
+    if (data.compareAtPrice === "") {
+      if (product) data.compareAtPrice = null;
+      else delete data.compareAtPrice;
+    }
 
     // El mismo schema Zod que valida en la API (packages/shared).
     const parsed = createProductSchema.safeParse(data);
@@ -63,6 +68,10 @@ export function ProductForm({ product }: { product?: Product }) {
         <label className="flex flex-col gap-1 text-sm font-medium">
           Precio (ARS)
           <input name="price" type="number" step="0.01" min="0" defaultValue={product?.price} className={input} />
+        </label>
+        <label className="flex flex-col gap-1 text-sm font-medium">
+          Precio anterior (opcional)
+          <input name="compareAtPrice" type="number" step="0.01" min="0" defaultValue={product?.compareAtPrice ?? ""} placeholder="Para mostrar oferta" className={input} />
         </label>
         <label className="flex flex-col gap-1 text-sm font-medium">
           Stock

@@ -99,4 +99,39 @@ describe("productService", () => {
 
     expect(productRepository.delete).toHaveBeenCalledWith("prod-1");
   });
+
+  describe("compareAtPrice", () => {
+    const base = { name: "T", description: "T", price: 100, stock: 1, categoryId: "c1" };
+
+    it("rejects creating with a compareAtPrice not greater than price", async () => {
+      vi.mocked(categoryRepository.findById).mockResolvedValue({ id: "c1" } as never);
+
+      await expect(productService.create({ ...base, compareAtPrice: 100 })).rejects.toThrow(ValidationError);
+      expect(productRepository.create).not.toHaveBeenCalled();
+    });
+
+    it("accepts a compareAtPrice greater than price", async () => {
+      vi.mocked(categoryRepository.findById).mockResolvedValue({ id: "c1" } as never);
+      vi.mocked(productRepository.create).mockResolvedValue({ id: "p1" } as never);
+
+      await productService.create({ ...base, compareAtPrice: 150 });
+
+      expect(productRepository.create).toHaveBeenCalled();
+    });
+
+    it("validates against the stored compareAtPrice when only price changes", async () => {
+      vi.mocked(productRepository.findById).mockResolvedValue({ id: "p1", price: "100.00", compareAtPrice: "120.00" } as never);
+
+      await expect(productService.update("p1", { price: 130 })).rejects.toThrow(ValidationError);
+    });
+
+    it("allows clearing compareAtPrice with null", async () => {
+      vi.mocked(productRepository.findById).mockResolvedValue({ id: "p1", price: "100.00", compareAtPrice: "120.00" } as never);
+      vi.mocked(productRepository.update).mockResolvedValue({ id: "p1" } as never);
+
+      await productService.update("p1", { compareAtPrice: null });
+
+      expect(productRepository.update).toHaveBeenCalledWith("p1", { compareAtPrice: null });
+    });
+  });
 });

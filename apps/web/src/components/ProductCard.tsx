@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/lib/api";
 import { AddToCartButton } from "./AddToCartButton";
-import { Price } from "./Price";
+import { OldPrice, Price } from "./Price";
 import { ProductImage } from "./ProductImage";
 
 const LOW_STOCK = 5;
@@ -27,9 +27,12 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
         <div className="flex flex-1 flex-col justify-between gap-2 px-3 pt-3">
           <h2 className="line-clamp-2 text-sm group-hover:text-brand">{product.name}</h2>
-          <p className="text-2xl">
-            <Price value={product.price} />
-          </p>
+          <div>
+            <OldPrice price={product.price} compareAtPrice={product.compareAtPrice} reserve />
+            <p className="text-2xl">
+              <Price value={product.price} />
+            </p>
+          </div>
         </div>
       </Link>
       <div className="p-3">

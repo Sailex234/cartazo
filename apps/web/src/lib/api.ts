@@ -18,6 +18,8 @@ export interface Product {
   name: string;
   description: string;
   price: string;
+  // Precio anterior (tachado); si es mayor que price, el producto está en oferta.
+  compareAtPrice: string | null;
   stock: number;
   imageUrl: string | null;
   categoryId: string;

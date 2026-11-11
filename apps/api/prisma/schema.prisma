@@ -43,18 +43,20 @@ model Category {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  description String
-  price       Decimal     @db.Decimal(10, 2)
-  stock       Int         @default(0)
-  imageUrl    String?
-  category    Category    @relation(fields: [categoryId], references: [id])
-  categoryId  String
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  name           String
+  description    String
+  price          Decimal     @db.Decimal(10, 2)
+  // Precio anterior ("tachado"): si es mayor que price, el producto está en oferta.
+  compareAtPrice Decimal?    @db.Decimal(10, 2)
+  stock          Int         @default(0)
+  imageUrl       String?
+  category       Category    @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   @@map("products")
 }

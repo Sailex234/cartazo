@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiError, getProduct } from "@/lib/api";
-import { Price } from "@/components/Price";
+import { OldPrice, Price } from "@/components/Price";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { ProductImage } from "@/components/ProductImage";
 
@@ -33,7 +33,10 @@ export default async function ProductPage({ params }: PageProps<"/products/[id]"
         <ProductImage src={product.imageUrl} alt={product.name} sizes="(min-width: 768px) 50vw, 100vw" />
         <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
-          <p className="text-4xl"><Price value={product.price} /></p>
+          <div>
+            <OldPrice price={product.price} compareAtPrice={product.compareAtPrice} className="text-base" />
+            <p className="text-4xl"><Price value={product.price} /></p>
+          </div>
           <p className="leading-relaxed text-muted">{product.description}</p>
           <p>
             {product.stock === 0 ? (

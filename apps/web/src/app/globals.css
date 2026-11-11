@@ -20,6 +20,7 @@
   --header: #e30613;
   --header-fg: #ffffff;
   --danger: #b91c1c;
+  --ok: #15803d;
 }
 
 @theme inline {
@@ -39,6 +40,7 @@
   --color-header: var(--header);
   --color-header-fg: var(--header-fg);
   --color-danger: var(--danger);
+  --color-ok: var(--ok);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

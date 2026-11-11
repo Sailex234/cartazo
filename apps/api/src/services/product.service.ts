@@ -16,6 +16,13 @@ async function assertCategoryExists(categoryId: string): Promise<void> {
   if (!category) throw new ValidationError(`Category ${categoryId} does not exist`);
 }
 
+// Un "precio anterior" menor o igual al actual no es una oferta: se rechaza en vez de mostrar un descuento falso.
+function assertValidCompareAtPrice(price: number, compareAtPrice: number | null | undefined): void {
+  if (compareAtPrice != null && compareAtPrice <= price) {
+    throw new ValidationError("compareAtPrice must be greater than price");
+  }
+}
+
 export const productService = {
   findMany: (query: ProductQuery): Promise<PaginatedResult<Product>> =>
     productRepository.findMany(query),
@@ -23,12 +30,18 @@ export const productService = {
 
   async create(data: CreateProductInput): Promise<Product> {
     await assertCategoryExists(data.categoryId);
+    assertValidCompareAtPrice(data.price, data.compareAtPrice);
     return productRepository.create(data);
   },
 
   async update(id: string, data: UpdateProductInput): Promise<Product> {
-    await findByIdOrThrow(id);
+    const current = await findByIdOrThrow(id);
     if (data.categoryId) await assertCategoryExists(data.categoryId);
+    // Se valida el resultado final (campos nuevos + los que ya tenía), no solo lo que llega.
+    assertValidCompareAtPrice(
+      data.price ?? Number(current.price),
+      data.compareAtPrice !== undefined ? data.compareAtPrice : current.compareAtPrice === null ? null : Number(current.compareAtPrice),
+    );
     return productRepository.update(id, data);
   },
 

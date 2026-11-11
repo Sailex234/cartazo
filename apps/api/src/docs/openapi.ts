@@ -124,6 +124,7 @@ export const openApiSpec = {
           name: { type: "string" },
           description: { type: "string" },
           price: { type: "string", description: "Decimal serializado como string", example: "1200.50" },
+          compareAtPrice: { type: "string", nullable: true, description: "Precio anterior (tachado); mayor que price si hay oferta", example: "1500.00" },
           stock: { type: "integer" },
           imageUrl: { type: "string", format: "uri", nullable: true },
           categoryId: { type: "string", format: "uuid" },
