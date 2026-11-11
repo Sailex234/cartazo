@@ -50,6 +50,12 @@ export class ApiError extends Error {
 // Hay que anteponerle el host de la API; las URLs externas (https://…) se dejan como están.
 export const imageSrc = (url: string | null): string | null => (url?.startsWith("/") ? `${API_URL}${url}` : url);
 
+// Aviso para que el contador del carrito del header se refresque cuando el carrito cambia.
+export const CART_CHANGED_EVENT = "cart:changed";
+const notifyCartChanged = () => {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(CART_CHANGED_EVENT));
+};
+
 async function request<T>(path: string, init?: { method?: string; body?: unknown; form?: FormData }): Promise<T> {
   let res: Response;
   try {
@@ -140,15 +146,20 @@ export async function getCart(): Promise<Cart> {
 }
 
 export async function addToCart(productId: string, quantity = 1): Promise<Cart> {
-  return (await request<{ data: Cart }>("/api/cart/items", { method: "POST", body: { productId, quantity } })).data;
+  const cart = (await request<{ data: Cart }>("/api/cart/items", { method: "POST", body: { productId, quantity } })).data;
+  notifyCartChanged();
+  return cart;
 }
 
 export async function updateCartItem(productId: string, quantity: number): Promise<Cart> {
-  return (await request<{ data: Cart }>(`/api/cart/items/${productId}`, { method: "PATCH", body: { quantity } })).data;
+  const cart = (await request<{ data: Cart }>(`/api/cart/items/${productId}`, { method: "PATCH", body: { quantity } })).data;
+  notifyCartChanged();
+  return cart;
 }
 
-export function removeCartItem(productId: string): Promise<void> {
-  return request<void>(`/api/cart/items/${productId}`, { method: "DELETE" });
+export async function removeCartItem(productId: string): Promise<void> {
+  await request<void>(`/api/cart/items/${productId}`, { method: "DELETE" });
+  notifyCartChanged();
 }
 
 export async function checkout(): Promise<{ orderId: string; checkoutUrl: string }> {

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { CART_CHANGED_EVENT, getCart } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 
 const icon = { "aria-hidden": true, viewBox: "0 0 24 24", className: "h-5 w-5", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" } as const;
@@ -17,6 +19,24 @@ const navLink = "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-
 export function HeaderNav() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [cartCount, setCartCount] = useState(0);
+
+  const shownCount = user ? cartCount : 0;
+
+  const refreshCount = useCallback(() => {
+    getCart()
+      .then((cart) => setCartCount(cart.items.reduce((sum, i) => sum + i.quantity, 0)))
+      .catch(() => setCartCount(0));
+  }, []);
+
+  // Con sesión se carga el carrito y se refresca cuando cambia. Sin sesión no se pide nada
+  // y el contador no se muestra (ver `shownCount`).
+  useEffect(() => {
+    if (!user) return;
+    refreshCount();
+    window.addEventListener(CART_CHANGED_EVENT, refreshCount);
+    return () => window.removeEventListener(CART_CHANGED_EVENT, refreshCount);
+  }, [user, refreshCount]);
 
   if (loading) return <div className="h-8 w-40" aria-hidden />;
 
@@ -32,7 +52,14 @@ export function HeaderNav() {
   return (
     <nav aria-label="Principal" className="flex flex-wrap items-center gap-1 text-sm">
       {user.role === "ADMIN" && <Link href="/admin" className={navLink}>Admin</Link>}
-      <Link href="/cart" className={navLink}><CartIcon /> Carrito</Link>
+      <Link href="/cart" className={navLink}><CartIcon /> Carrito
+        {shownCount > 0 && (
+          <span className="min-w-5 rounded-full bg-accent px-1.5 text-center text-xs font-bold leading-5 text-accent-fg">
+            <span aria-hidden>{shownCount}</span>
+            <span className="sr-only"> productos en el carrito</span>
+          </span>
+        )}
+      </Link>
       <Link href="/orders" className={navLink}>Mis órdenes</Link>
       <span className="ml-2 hidden items-center gap-2 border-l border-white/30 pl-3 sm:flex">
         <span
