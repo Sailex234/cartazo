@@ -19,7 +19,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Cartazo",
   description: "Tienda online — catálogo, carrito y checkout.",
+  // Es una demo con datos de prueba: que los buscadores no la indexen.
+  robots: { index: false, follow: false },
 };
+
+const isDemo = process.env.NEXT_PUBLIC_DEMO === "true";
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // La barra de categorías no debe tumbar el sitio si la API no responde.
@@ -37,6 +41,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         >
           Saltar al contenido
         </a>
+        {isDemo && (
+          <p className="bg-accent px-4 py-1.5 text-center text-xs font-bold text-accent-fg">
+            DEMO · datos de prueba · pagos en modo test de MercadoPago (no se cobra nada)
+          </p>
+        )}
         <header className="sticky top-0 z-20 bg-header text-header-fg shadow-sm">
           <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
             <Link href="/" className="text-xl font-black italic tracking-tight">
@@ -83,7 +92,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <p>
               <b className="font-black italic text-white">Cartazo</b> · Tu mercado de barrio, ahora online
             </p>
-            <p>Pagos con MercadoPago (modo prueba) · © {new Date().getFullYear()}</p>
+            <p>{isDemo ? "Proyecto de portfolio · " : ""}Pagos con MercadoPago (modo prueba) · © {new Date().getFullYear()}</p>
           </div>
         </footer>
         </AuthProvider>

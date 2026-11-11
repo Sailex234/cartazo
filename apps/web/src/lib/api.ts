@@ -9,8 +9,10 @@ import type {
   UpdateProductInput,
 } from "@cartazo/shared";
 
-// NEXT_PUBLIC_: la misma URL la usan los Server Components y el navegador (auth/carrito).
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// En el navegador las requests van a "/api/*" del mismo origen: next.config.ts las reenvía a la API (rewrites).
+// Así la cookie del JWT es de primera parte y no la bloquea el navegador. En el servidor (Server Components)
+// no hay origen al que ser relativo, así que se usa la URL real de la API (env API_URL, solo server).
+const API_URL = typeof window === "undefined" ? (process.env.API_URL ?? "http://localhost:4000") : "";
 
 // Prisma serializa Decimal como string en JSON: price llega "1200.5", no número.
 export interface Product {
@@ -46,9 +48,9 @@ export class ApiError extends Error {
   }
 }
 
-// Las fotos subidas desde el admin se guardan como ruta relativa a la API ("/api/products/:id/image?v=…").
-// Hay que anteponerle el host de la API; las URLs externas (https://…) se dejan como están.
-export const imageSrc = (url: string | null): string | null => (url?.startsWith("/") ? `${API_URL}${url}` : url);
+// Las fotos subidas desde el admin son una ruta relativa ("/api/products/:id/image?v=…"): el navegador la
+// resuelve contra el mismo origen y el rewrite la manda a la API. Las URLs externas se dejan como están.
+export const imageSrc = (url: string | null): string | null => url;
 
 // Aviso para que el contador del carrito del header se refresque cuando el carrito cambia.
 export const CART_CHANGED_EVENT = "cart:changed";

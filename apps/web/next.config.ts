@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     config.resolve.extensionAlias = { ".js": [".ts", ".tsx", ".js"] };
     return config;
   },
+  // El navegador le habla a "/api/*" del mismo origen y Next reenvía a la API (Render en producción).
+  async rewrites() {
+    return [{ source: "/api/:path*", destination: `${process.env.API_URL ?? "http://localhost:4000"}/api/:path*` }];
+  },
   images: {
     // next/image solo optimiza hosts declarados acá (evita que el optimizador
     // se use como proxy abierto). Sumar el host real cuando haya imágenes reales.

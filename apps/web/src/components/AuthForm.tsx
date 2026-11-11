@@ -44,6 +44,21 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  // Acceso rápido para la demo pública (credenciales del seed, sin ningún dato real).
+  async function demoLogin(email: string, password: string) {
+    setError(null);
+    setPending(true);
+    try {
+      setUser(await login({ email, password }));
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "No se pudo conectar con el servidor");
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <div className="mx-auto grid w-full max-w-3xl overflow-hidden rounded-xl border border-line bg-surface shadow-sm md:min-h-[460px] md:grid-cols-2">
       <aside
@@ -100,6 +115,14 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <button disabled={pending} className="btn btn-primary btn-lg w-full">
           {pending ? "Enviando…" : isRegister ? "Crear cuenta" : "Iniciar sesión"}
         </button>
+        {process.env.NEXT_PUBLIC_DEMO === "true" && !isRegister && (
+          <div className="flex flex-col gap-2 rounded-lg bg-brand-soft p-3 text-xs">
+            <p className="font-semibold">Probá la demo sin registrarte:</p>
+            <button type="button" disabled={pending} onClick={() => demoLogin("admin@cartazo.com", "admin12345")} className="btn btn-secondary w-full">
+              Entrar como admin (panel de inventario)
+            </button>
+          </div>
+        )}
         <p className="text-center text-sm text-muted">
           {isRegister ? "¿Ya tenés cuenta? " : "¿No tenés cuenta? "}
           <Link href={isRegister ? "/login" : "/register"} className="font-bold text-foreground underline underline-offset-4 hover:text-brand">
