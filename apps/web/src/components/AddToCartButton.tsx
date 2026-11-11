@@ -5,14 +5,23 @@ import { useState } from "react";
 import { addToCart, ApiError } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 
-export function AddToCartButton({ productId, disabled }: { productId: string; disabled: boolean }) {
+export function AddToCartButton({
+  productId,
+  disabled,
+  compact = false,
+}: {
+  productId: string;
+  disabled: boolean;
+  compact?: boolean;
+}) {
+  const size = compact ? "w-full" : "btn-lg w-fit";
   const { user, loading } = useAuth();
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
 
   if (!loading && !user) {
     return (
-      <Link href="/login" className="btn btn-primary btn-lg w-fit">
+      <Link href="/login" className={`btn btn-primary ${size}`}>
         Ingresá para comprar
       </Link>
     );
@@ -32,13 +41,13 @@ export function AddToCartButton({ productId, disabled }: { productId: string; di
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={compact ? "flex flex-col gap-1" : "flex flex-col gap-2"}>
       <button
         onClick={onClick}
         disabled={disabled || pending || loading}
-        className="btn btn-primary btn-lg w-fit"
+        className={`btn btn-primary ${size}`}
       >
-        {pending ? "Agregando…" : "Agregar al carrito"}
+        {pending ? "Agregando…" : disabled && compact ? "Sin stock" : "Agregar al carrito"}
       </button>
       {message && (
         <p className={message.ok ? "text-sm text-brand" : "text-sm text-danger"} role="status">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { HeaderNav } from "@/components/HeaderNav";
+import { getCategories } from "@/lib/api";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +21,9 @@ export const metadata: Metadata = {
   description: "Tienda online — catálogo, carrito y checkout.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // La barra de categorías no debe tumbar el sitio si la API no responde.
+  const categories = await getCategories().catch(() => []);
   return (
     <html
       lang="es"
@@ -34,25 +37,53 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Saltar al contenido
         </a>
-        <header className="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
-          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
-            <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-              <span
-                aria-hidden
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-base text-brand-fg"
-              >
-                C
-              </span>
+        <header className="sticky top-0 z-20 bg-header text-header-fg shadow-sm">
+          <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
+            <Link href="/" className="text-xl font-black italic tracking-tight">
               Cartazo
             </Link>
-            <HeaderNav />
+            <form action="/" method="get" role="search" className="order-last flex min-w-0 basis-full overflow-hidden rounded-full bg-white focus-within:ring-2 focus-within:ring-accent md:order-none md:basis-auto md:flex-1">
+              <input
+                name="q"
+                aria-label="Buscar productos"
+                placeholder="Buscá tu producto…"
+                className="min-w-0 flex-1 bg-transparent px-4 py-2 text-sm text-[#1c1c1c] outline-none placeholder:text-[#5f5f5f]"
+              />
+              <button aria-label="Buscar" className="px-4 text-brand hover:bg-brand-soft">
+                <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="6.5" />
+                  <path d="m20 20-4.2-4.2" />
+                </svg>
+              </button>
+            </form>
+            <div className="ml-auto md:ml-0">
+              <HeaderNav />
+            </div>
           </div>
+          <nav aria-label="Categorías" className="bg-brand-hover text-header-fg">
+            <div className="mx-auto flex w-full max-w-5xl overflow-x-auto px-4 text-xs sm:text-sm">
+              <Link href="/" className="whitespace-nowrap bg-black/20 px-3 py-2 font-bold hover:bg-black/30">
+                Todas
+              </Link>
+              {categories.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/?category=${c.id}#catalogo`}
+                  className="whitespace-nowrap px-3 py-2 font-semibold hover:bg-black/20"
+                >
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+          </nav>
         </header>
-        <main id="contenido" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
-        <footer className="mt-8 border-t border-line bg-surface">
-          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-sm text-muted">
-            <p>© {new Date().getFullYear()} Cartazo · Proyecto de portfolio</p>
-            <p>Pagos en modo prueba con MercadoPago</p>
+        <main id="contenido" className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">{children}</main>
+        <footer className="mt-6 bg-brand-hover text-white">
+          <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 text-xs text-white/85">
+            <p>
+              <b className="font-black italic text-white">Cartazo</b> · Tu mercado de barrio, ahora online
+            </p>
+            <p>Pagos con MercadoPago (modo prueba) · © {new Date().getFullYear()}</p>
           </div>
         </footer>
         </AuthProvider>

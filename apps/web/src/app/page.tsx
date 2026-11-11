@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCategories, getProducts } from "@/lib/api";
+import { getProducts } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 
 // Los filtros son un <form method="get">: el estado vive en la URL (compartible,
@@ -17,10 +17,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     maxPrice: num("maxPrice"),
   };
 
-  const [{ data: products, meta }, categories] = await Promise.all([
-    getProducts({ ...filters, page, limit: 12 }),
-    getCategories(),
-  ]);
+  const { data: products, meta } = await getProducts({ ...filters, page, limit: 12 });
   const totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
 
   const pageHref = (p: number) => {
@@ -31,39 +28,62 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   const hasFilters = Boolean(filters.q || filters.category || filters.minPrice !== undefined || filters.maxPrice !== undefined);
   const showHero = !hasFilters && page === 1;
-  const chip = (active: boolean) =>
-    `rounded-full border px-4 py-1.5 text-sm font-medium transition ${
-      active ? "border-brand bg-brand text-brand-fg" : "border-line bg-surface hover:bg-surface-muted"
-    }`;
-
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       {showHero && (
-        <section className="rounded-3xl bg-brand-soft px-6 py-10 text-brand-soft-fg sm:px-10 sm:py-14">
-          <h1 className="max-w-xl text-3xl font-bold tracking-tight sm:text-5xl">Todo para tu despensa, en un solo lugar</h1>
-          <p className="mt-3 max-w-lg text-base sm:text-lg">
-            Almacén, bebidas, lácteos y más. Armá tu carrito y pagá seguro con MercadoPago.
-          </p>
-          <a href="#catalogo" className="btn btn-primary btn-lg mt-6">Ver productos</a>
-        </section>
+        <>
+          <section className="flex items-center justify-between gap-6 overflow-hidden rounded-xl bg-[linear-gradient(105deg,var(--brand)_0_62%,var(--accent)_62%)] px-6 py-6 text-white sm:px-8">
+            <div>
+              <h1 className="text-2xl font-black leading-tight tracking-tight sm:text-4xl">Ofertas de la semana</h1>
+              <p className="mt-2 max-w-sm text-sm sm:text-base">Almacén, bebidas, lácteos y más. Pagá seguro con MercadoPago.</p>
+              <a href="#catalogo" className="btn btn-accent mt-4 shadow-md">Ver productos</a>
+            </div>
+            <div aria-hidden className="hidden pr-2 text-center text-accent-fg sm:block">
+              <div className="text-6xl leading-none">🧺</div>
+              <div className="mt-1 text-xl font-black">¡Precios rebajados!</div>
+            </div>
+          </section>
+          <section aria-label="Beneficios" className="grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                title: "Envío a domicilio",
+                text: "Coordinás la entrega al pagar",
+                icon: <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19.5a1.5 1.5 0 1 0 0-.01M17 19.5a1.5 1.5 0 1 0 0-.01" />,
+              },
+              {
+                title: "Pagá como quieras",
+                text: "Tarjetas, débito y dinero en cuenta",
+                icon: <path d="M3 6.5h18v11H3zM3 10.5h18M6.5 14.5h4" />,
+              },
+              {
+                title: "Compra protegida",
+                text: "Pagos seguros con MercadoPago",
+                icon: <path d="M12 3l7.5 3v5.5c0 4.5-3 8-7.5 9.5-4.5-1.500-7.500-5-7.500-9.500V6zM9 12l2.200 2.200L15.500 10" />,
+              },
+            ].map((b) => (
+              <div key={b.title} className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-sm ring-1 ring-black/5">
+                <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-fg">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {b.icon}
+                  </svg>
+                </span>
+                <div className="text-xs text-muted">
+                  <b className="block text-sm text-foreground">{b.title}</b>
+                  {b.text}
+                </div>
+              </div>
+            ))}
+          </section>
+        </>
       )}
 
       <section id="catalogo" aria-labelledby="catalogo-titulo" className="flex scroll-mt-20 flex-col gap-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="catalogo-titulo" className="text-2xl font-semibold tracking-tight">
+          <h2 id="catalogo-titulo" className="flex items-center gap-2 text-2xl font-bold tracking-tight before:h-6 before:w-1.5 before:rounded-sm before:bg-brand before:content-['']">
             {hasFilters ? "Resultados" : "Catálogo"}
           </h2>
           <p className="text-sm text-muted">{meta.total} producto(s)</p>
         </div>
-
-        <nav aria-label="Categorías" className="flex flex-wrap gap-2">
-          <Link href="/" className={chip(!filters.category)}>Todas</Link>
-          {categories.map((c) => (
-            <Link key={c.id} href={`/?category=${c.id}#catalogo`} className={chip(filters.category === c.id)}>
-              {c.name}
-            </Link>
-          ))}
-        </nav>
 
         <form method="get" role="search" aria-label="Filtrar productos" className="card flex flex-wrap items-end gap-3 p-3">
           {filters.category && <input type="hidden" name="category" value={filters.category} />}

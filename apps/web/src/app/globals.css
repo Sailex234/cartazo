@@ -3,17 +3,22 @@
 /* Tokens de diseño: todo el color de la UI sale de acá, así claro/oscuro se
    cambia en un solo lugar. Los pares fondo/texto cumplen contraste AA. */
 :root {
-  --background: #fafaf9;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #f5f5f5;
+  --foreground: #1c1c1c;
   --surface: #ffffff;
-  --surface-muted: #f4f4f5;
-  --line: #e4e4e7;
-  --muted: #52525b;
-  --brand: #047857;
-  --brand-hover: #065f46;
+  --surface-muted: #efefef;
+  --line: #e3e3e3;
+  --muted: #5f5f5f;
+  --brand: #e30613;
+  --brand-hover: #b8050f;
   --brand-fg: #ffffff;
-  --brand-soft: #d1fae5;
-  --brand-soft-fg: #064e3b;
+  --brand-soft: #fde8ea;
+  --brand-soft-fg: #7a0a11;
+  --accent: #ffd400;
+  --accent-fg: #1c1c1c;
+  --header: #e30613;
+  --header-fg: #ffffff;
   --danger: #b91c1c;
 }
 
@@ -29,26 +34,13 @@
   --color-brand-fg: var(--brand-fg);
   --color-brand-soft: var(--brand-soft);
   --color-brand-soft-fg: var(--brand-soft-fg);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-header: var(--header);
+  --color-header-fg: var(--header-fg);
   --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --surface: #131315;
-    --surface-muted: #1c1c1f;
-    --line: #2a2a2e;
-    --muted: #a1a1aa;
-    --brand: #34d399;
-    --brand-hover: #6ee7b7;
-    --brand-fg: #022c22;
-    --brand-soft: #064e3b;
-    --brand-soft-fg: #a7f3d0;
-    --danger: #f87171;
-  }
 }
 
 body {
@@ -79,10 +71,10 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 0.625rem;
-    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    padding: 0.5rem 1.25rem;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 700;
     line-height: 1.25rem;
     transition: background-color 0.15s, border-color 0.15s, opacity 0.15s;
     cursor: pointer;
@@ -123,7 +115,7 @@ body {
   }
   .input {
     width: 100%;
-    border-radius: 0.625rem;
+    border-radius: 0.375rem;
     border: 1px solid var(--line);
     background: var(--surface);
     padding: 0.5rem 0.75rem;
@@ -133,8 +125,24 @@ body {
   .input::placeholder {
     color: var(--muted);
   }
+  .field-input {
+    width: 100%;
+    border: 0;
+    border-bottom: 2px solid var(--line);
+    background: transparent;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+    color: var(--foreground);
+  }
+  .field-input::placeholder {
+    color: var(--muted);
+  }
+  .field-input:focus-visible {
+    outline: none;
+    border-color: var(--brand);
+  }
   .card {
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     border: 1px solid var(--line);
     background: var(--surface);
   }
@@ -154,6 +162,18 @@ body {
   }
   .badge-danger {
     color: var(--danger);
+  }
+  .btn-accent {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+  .btn-accent:hover:not(:disabled) {
+    filter: brightness(0.95);
+  }
+  .badge-accent {
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-weight: 700;
   }
   .link {
     text-decoration: underline;

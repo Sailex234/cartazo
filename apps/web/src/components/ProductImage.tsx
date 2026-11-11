@@ -9,9 +9,19 @@ function placeholderStyle(name: string) {
   return { background: `linear-gradient(135deg, hsl(${hue} 60% 78%), hsl(${(hue + 40) % 360} 55% 62%))` };
 }
 
-export function ProductImage({ src, alt, sizes }: { src: string | null; alt: string; sizes: string }) {
+export function ProductImage({
+  src,
+  alt,
+  sizes,
+  className = "aspect-square",
+}: {
+  src: string | null;
+  alt: string;
+  sizes: string;
+  className?: string;
+}) {
   return (
-    <div className="relative aspect-square overflow-hidden rounded-xl bg-surface-muted">
+    <div className={`relative overflow-hidden rounded-md bg-surface-muted ${className}`}>
       {src ? (
         <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
       ) : (
