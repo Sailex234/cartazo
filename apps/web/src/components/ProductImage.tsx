@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { imageSrc } from "@/lib/api";
 
 // Sin imagen: un degradé estable derivado del nombre (mismo producto = mismo color)
 // con la inicial grande, en vez de un recuadro gris vacío.
@@ -23,7 +24,8 @@ export function ProductImage({
   return (
     <div className={`relative overflow-hidden rounded-md bg-surface-muted ${className}`}>
       {src ? (
-        <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
+        // Las fotos de nuestra API ya vienen achicadas (WebP, máx. 800 px): no pasan por el optimizador de Next.
+        <Image src={imageSrc(src)!} alt={alt} fill sizes={sizes} unoptimized={src.startsWith("/api/")} className="object-cover" />
       ) : (
         <div
           role="img"

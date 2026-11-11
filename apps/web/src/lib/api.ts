@@ -46,7 +46,11 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
+// Las fotos subidas desde el admin se guardan como ruta relativa a la API ("/api/products/:id/image?v=…").
+// Hay que anteponerle el host de la API; las URLs externas (https://…) se dejan como están.
+export const imageSrc = (url: string | null): string | null => (url?.startsWith("/") ? `${API_URL}${url}` : url);
+
+async function request<T>(path: string, init?: { method?: string; body?: unknown; form?: FormData }): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
@@ -54,8 +58,9 @@ async function request<T>(path: string, init?: { method?: string; body?: unknown
       // credentials: "include" hace que el navegador mande/reciba la cookie httpOnly del JWT
       credentials: "include",
       cache: "no-store",
+      // Con FormData el navegador pone solo el Content-Type (con el boundary); no hay que fijarlo.
       headers: init?.body !== undefined ? { "Content-Type": "application/json" } : undefined,
-      body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
+      body: init?.form ?? (init?.body !== undefined ? JSON.stringify(init.body) : undefined),
     });
   } catch {
     // API caída o sin red: fetch lanza un TypeError críptico ("Failed to fetch");
@@ -164,6 +169,16 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
 
 export async function updateProduct(id: string, input: UpdateProductInput): Promise<Product> {
   return (await request<{ data: Product }>(`/api/products/${id}`, { method: "PUT", body: input })).data;
+}
+
+export async function uploadProductImage(id: string, file: File): Promise<Product> {
+  const form = new FormData();
+  form.append("image", file);
+  return (await request<{ data: Product }>(`/api/products/${id}/image`, { method: "PUT", form })).data;
+}
+
+export async function removeProductImage(id: string): Promise<Product> {
+  return (await request<{ data: Product }>(`/api/products/${id}/image`, { method: "DELETE" })).data;
 }
 
 export async function updateProductStock(id: string, stock: number): Promise<Product> {

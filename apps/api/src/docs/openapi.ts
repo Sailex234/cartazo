@@ -126,7 +126,11 @@ export const openApiSpec = {
           price: { type: "string", description: "Decimal serializado como string", example: "1200.50" },
           compareAtPrice: { type: "string", nullable: true, description: "Precio anterior (tachado); mayor que price si hay oferta", example: "1500.00" },
           stock: { type: "integer" },
-          imageUrl: { type: "string", format: "uri", nullable: true },
+          imageUrl: {
+            type: "string",
+            nullable: true,
+            description: "URL externa, o `/api/products/{id}/image?v=...` si la foto se subió desde el admin",
+          },
           categoryId: { type: "string", format: "uuid" },
         },
       },
@@ -287,6 +291,41 @@ export const openApiSpec = {
           "si solo está en carritos, desaparece de ellos.",
         ...protectedOp,
         responses: { 204: res("Borrado"), ...unauthorized, ...forbidden, ...notFound, 409: errorRes("El producto tiene órdenes") },
+      },
+    },
+    "/api/products/{id}/image": {
+      parameters: [uuidParam("id")],
+      get: {
+        tags: ["Products"],
+        summary: "Foto del producto",
+        responses: {
+          200: { description: "Imagen WebP", content: { "image/webp": { schema: { type: "string", format: "binary" } } } },
+          ...invalid,
+          ...notFound,
+        },
+      },
+      put: {
+        tags: ["Products"],
+        summary: "Subir o reemplazar la foto",
+        ...adminOnly,
+        description:
+          "Requiere rol **ADMIN**. `multipart/form-data` con el campo `image` (JPG, PNG o WebP, máx. 2 MB). " +
+          "La API la achica a 800 px y la guarda como WebP en Postgres.",
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: { type: "object", required: ["image"], properties: { image: { type: "string", format: "binary" } } },
+            },
+          },
+        },
+        responses: { 200: res("Producto con su nueva imageUrl", data(ref("Product"))), ...invalid, ...unauthorized, ...forbidden, ...notFound },
+      },
+      delete: {
+        tags: ["Products"],
+        summary: "Quitar la foto",
+        ...adminOnly,
+        responses: { 200: res("Producto sin imagen", data(ref("Product"))), ...invalid, ...unauthorized, ...forbidden, ...notFound },
       },
     },
     "/api/products/{id}/stock": {

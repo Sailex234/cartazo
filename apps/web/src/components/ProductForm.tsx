@@ -4,9 +4,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createProductSchema } from "@cartazo/shared";
-import { ApiError, createProduct, getCategories, updateProduct, type Category, type Product } from "@/lib/api";
+import {
+  ApiError,
+  createProduct,
+  getCategories,
+  imageSrc,
+  removeProductImage,
+  updateProduct,
+  uploadProductImage,
+  type Category,
+  type Product,
+} from "@/lib/api";
 
 const input = "input";
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 // Sin `product` crea; con `product` edita. Mismo formulario para los dos casos.
 export function ProductForm({ product }: { product?: Product }) {
@@ -14,6 +26,10 @@ export function ProductForm({ product }: { product?: Product }) {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // Foto: archivo elegido (aún sin subir), su vista previa y si se pidió quitar la actual.
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
 
   useEffect(() => {
     getCategories().then(setCategories).catch((e) => setError(e.message));
@@ -23,8 +39,6 @@ export function ProductForm({ product }: { product?: Product }) {
     e.preventDefault();
     setError(null);
     const data: Record<string, unknown> = Object.fromEntries(new FormData(e.currentTarget));
-    // Un input vacío llega como "": el schema espera que imageUrl falte, no que sea "".
-    if (data.imageUrl === "") delete data.imageUrl;
     // Precio anterior vacío: al editar se manda null (borra la oferta); al crear, simplemente no va.
     if (data.compareAtPrice === "") {
       if (product) data.compareAtPrice = null;
@@ -41,8 +55,17 @@ export function ProductForm({ product }: { product?: Product }) {
 
     setPending(true);
     try {
-      if (product) await updateProduct(product.id, parsed.data);
-      else await createProduct(parsed.data);
+      const saved = product ? await updateProduct(product.id, parsed.data) : await createProduct(parsed.data);
+      // La foto viaja aparte (multipart): primero se guarda el producto, después se sube o quita.
+      try {
+        if (file) await uploadProductImage(saved.id, file);
+        else if (removeImage) await removeProductImage(saved.id);
+      } catch (err) {
+        const reason = err instanceof ApiError ? err.message : "error de conexión";
+        setError(`El producto se guardó, pero la foto no: ${reason}.`);
+        if (!product) router.replace(`/admin/products/${saved.id}/edit`);
+        return;
+      }
       router.push("/admin/products");
       router.refresh();
     } catch (err) {
@@ -51,6 +74,28 @@ export function ProductForm({ product }: { product?: Product }) {
       setPending(false);
     }
   }
+
+  function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = e.target.files?.[0] ?? null;
+    setError(null);
+    if (picked && !IMAGE_TYPES.includes(picked.type)) {
+      setError("La imagen debe ser JPG, PNG o WebP.");
+      e.target.value = "";
+      return;
+    }
+    if (picked && picked.size > MAX_IMAGE_BYTES) {
+      setError("La imagen pesa más de 2 MB.");
+      e.target.value = "";
+      return;
+    }
+    if (preview) URL.revokeObjectURL(preview);
+    setFile(picked);
+    setPreview(picked ? URL.createObjectURL(picked) : null);
+    if (picked) setRemoveImage(false);
+  }
+
+  const currentImage = imageSrc(product?.imageUrl ?? null);
+  const shownImage = preview ?? (removeImage ? null : currentImage);
 
   if (!categories) return <p>{error ? <span className="text-danger">{error}</span> : "Cargando…"}</p>;
 
@@ -87,13 +132,28 @@ export function ProductForm({ product }: { product?: Product }) {
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-sm font-medium">
-        URL de la imagen (opcional)
-        <input name="imageUrl" type="url" defaultValue={product?.imageUrl ?? ""} className={input} />
-        <span className="text-xs font-normal text-muted">
-          Solo se muestran hosts permitidos en <code>next.config.ts</code> (unsplash, picsum).
-        </span>
-      </label>
+      <div className="flex flex-col gap-2 text-sm font-medium">
+        <label htmlFor="image">Imagen (opcional)</label>
+        <div className="flex items-center gap-4">
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-muted">
+            {shownImage ? (
+              // eslint-disable-next-line @next/next/no-img-element -- vista previa de un blob local, next/image no aplica
+              <img src={shownImage} alt="Vista previa de la imagen" className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-xs font-normal text-muted">Sin imagen</span>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <input id="image" type="file" accept={IMAGE_TYPES.join(",")} onChange={onPickFile} className="text-xs font-normal" />
+            {currentImage && !file && (
+              <button type="button" onClick={() => setRemoveImage((v) => !v)} className="btn btn-secondary btn-sm w-fit">
+                {removeImage ? "Conservar imagen actual" : "Quitar imagen actual"}
+              </button>
+            )}
+            <span className="text-xs font-normal text-muted">JPG, PNG o WebP, hasta 2 MB. Se achica a 800 px automáticamente.</span>
+          </div>
+        </div>
+      </div>
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       <div className="flex items-center gap-4">
         <button

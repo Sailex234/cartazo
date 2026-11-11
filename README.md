@@ -15,14 +15,15 @@ productos en PHP plano; está reescrito desde cero en TypeScript.
   confirmación de pago por webhook y reconciliación si el aviso se demora.
 - **Historial de órdenes** y estado de cada pago.
 - **Panel de admin**: inventario, alta/edición/borrado de productos (con precio anterior opcional
-  para armar ofertas), ajuste de stock inline y gestión de categorías.
+  para armar ofertas y **subida de foto**), ajuste de stock inline y gestión de categorías.
+- **Contador del carrito** en el header.
 - **API documentada** con OpenAPI/Swagger, generada desde los mismos schemas que validan los requests.
 
 ## Stack
 
 | Capa | Tecnología |
 |---|---|
-| Backend | Node.js, Express, TypeScript (ESM) |
+| Backend | Node.js, Express, TypeScript (ESM), multer + sharp (fotos) |
 | Base de datos | PostgreSQL + Prisma 7 |
 | Validación | Zod (schemas compartidos entre API y web) |
 | Frontend | Next.js 16 (App Router), React, Tailwind CSS 4 |
@@ -104,3 +105,7 @@ SINTAXIS.md      Glosario de sintaxis anclado a código real del proyecto
   precio actual (lo valida el service). Es solo informativo: el checkout cobra `price`.
 - **Interfaz siempre clara:** los colores son tokens CSS (`globals.css`); cambiar la identidad es
   editar esos tokens.
+- **Las fotos viven en Postgres**, no en un servicio de archivos: el admin las sube, la API las valida
+  por contenido, las achica a 800 px y las guarda como WebP (tabla aparte, 1 a 1 con el producto). Evita
+  depender de otra cuenta y sobrevive a los reinicios de un hosting gratuito. Para un catálogo grande
+  se movería a S3/Cloudinary guardando solo la URL.

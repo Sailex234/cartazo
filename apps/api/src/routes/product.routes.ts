@@ -10,6 +10,7 @@ import { productController } from "../controllers/product.controller.js";
 import { validate } from "../middleware/validate.js";
 import { catchAsync } from "../middleware/catchAsync.js";
 import { requireAuth, requireRole } from "../middleware/auth.middleware.js";
+import { uploadImage } from "../middleware/upload.js";
 
 export const productRouter = Router();
 
@@ -49,6 +50,30 @@ productRouter.patch(
   requireRole("ADMIN"),
   validate({ params: productIdParamsSchema, body: updateStockSchema }),
   catchAsync(productController.updateStock),
+);
+
+// La foto se sube como multipart/form-data (campo "image"), no como JSON.
+productRouter.get(
+  "/:id/image",
+  validate({ params: productIdParamsSchema }),
+  catchAsync(productController.getImage),
+);
+
+productRouter.put(
+  "/:id/image",
+  requireAuth,
+  requireRole("ADMIN"),
+  validate({ params: productIdParamsSchema }),
+  uploadImage,
+  catchAsync(productController.setImage),
+);
+
+productRouter.delete(
+  "/:id/image",
+  requireAuth,
+  requireRole("ADMIN"),
+  validate({ params: productIdParamsSchema }),
+  catchAsync(productController.removeImage),
 );
 
 productRouter.delete(

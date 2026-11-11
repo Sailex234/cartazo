@@ -8,8 +8,15 @@ vi.mock("../../src/repositories/product.repository.js", () => ({
     create: vi.fn(),
     update: vi.fn(),
     updateStock: vi.fn(),
+    setImage: vi.fn(),
+    removeImage: vi.fn(),
+    findImage: vi.fn(),
     delete: vi.fn(),
   },
+}));
+
+vi.mock("../../src/lib/image.js", () => ({
+  processProductImage: vi.fn(),
 }));
 
 vi.mock("../../src/repositories/category.repository.js", () => ({
@@ -27,6 +34,7 @@ vi.mock("../../src/repositories/order.repository.js", () => ({
 const { productRepository } = await import("../../src/repositories/product.repository.js");
 const { categoryRepository } = await import("../../src/repositories/category.repository.js");
 const { orderRepository } = await import("../../src/repositories/order.repository.js");
+const { processProductImage } = await import("../../src/lib/image.js");
 const { productService } = await import("../../src/services/product.service.js");
 
 describe("productService", () => {
@@ -132,6 +140,40 @@ describe("productService", () => {
       await productService.update("p1", { compareAtPrice: null });
 
       expect(productRepository.update).toHaveBeenCalledWith("p1", { compareAtPrice: null });
+    });
+  });
+
+  describe("imagen del producto", () => {
+    it("setImage procesa el archivo y lo guarda", async () => {
+      vi.mocked(productRepository.findById).mockResolvedValue({ id: "p1" } as never);
+      vi.mocked(processProductImage).mockResolvedValue({ data: Buffer.from("webp"), contentType: "image/webp" });
+      vi.mocked(productRepository.setImage).mockResolvedValue({ id: "p1" } as never);
+
+      await productService.setImage("p1", Buffer.from("raw"));
+
+      expect(processProductImage).toHaveBeenCalledWith(Buffer.from("raw"));
+      expect(productRepository.setImage).toHaveBeenCalledWith("p1", { data: Buffer.from("webp"), contentType: "image/webp" });
+    });
+
+    it("setImage no toca la base si el archivo no es una imagen", async () => {
+      vi.mocked(productRepository.findById).mockResolvedValue({ id: "p1" } as never);
+      vi.mocked(processProductImage).mockRejectedValue(new ValidationError("File is not a valid image"));
+
+      await expect(productService.setImage("p1", Buffer.from("x"))).rejects.toThrow(ValidationError);
+      expect(productRepository.setImage).not.toHaveBeenCalled();
+    });
+
+    it("setImage y removeImage fallan con NotFoundError si el producto no existe", async () => {
+      vi.mocked(productRepository.findById).mockResolvedValue(null);
+
+      await expect(productService.setImage("x", Buffer.from("x"))).rejects.toThrow(NotFoundError);
+      await expect(productService.removeImage("x")).rejects.toThrow(NotFoundError);
+    });
+
+    it("getImage falla con NotFoundError si el producto no tiene foto", async () => {
+      vi.mocked(productRepository.findImage).mockResolvedValue(null);
+
+      await expect(productService.getImage("p1")).rejects.toThrow(NotFoundError);
     });
   });
 });

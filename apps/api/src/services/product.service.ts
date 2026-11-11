@@ -1,9 +1,10 @@
-import type { Product } from "@prisma/client";
+import type { Product, ProductImage } from "@prisma/client";
 import type { CreateProductInput, ProductQuery, UpdateProductInput } from "@cartazo/shared";
 import { productRepository, type PaginatedResult } from "../repositories/product.repository.js";
 import { categoryRepository } from "../repositories/category.repository.js";
 import { orderRepository } from "../repositories/order.repository.js";
 import { ConflictError, NotFoundError, ValidationError } from "../errors/AppError.js";
+import { processProductImage } from "../lib/image.js";
 
 async function findByIdOrThrow(id: string): Promise<Product> {
   const product = await productRepository.findById(id);
@@ -43,6 +44,23 @@ export const productService = {
       data.compareAtPrice !== undefined ? data.compareAtPrice : current.compareAtPrice === null ? null : Number(current.compareAtPrice),
     );
     return productRepository.update(id, data);
+  },
+
+  async setImage(id: string, file: Buffer): Promise<Product> {
+    await findByIdOrThrow(id);
+    const processed = await processProductImage(file);
+    return productRepository.setImage(id, processed);
+  },
+
+  async removeImage(id: string): Promise<Product> {
+    await findByIdOrThrow(id);
+    return productRepository.removeImage(id);
+  },
+
+  async getImage(id: string): Promise<ProductImage> {
+    const image = await productRepository.findImage(id);
+    if (!image) throw new NotFoundError(`Product ${id} has no image`);
+    return image;
   },
 
   async updateStock(id: string, stock: number): Promise<Product> {

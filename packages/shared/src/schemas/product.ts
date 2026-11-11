@@ -7,7 +7,8 @@ export const createProductSchema = z.object({
   // Precio anterior para mostrar el descuento. null lo borra (útil al editar).
   compareAtPrice: z.union([z.null(), z.coerce.number().positive().multipleOf(0.01)]).optional(),
   stock: z.coerce.number().int().min(0).default(0),
-  imageUrl: z.string().url().optional(),
+  // null borra la imagen. Las subidas desde el admin no pasan por acá (ver PUT /:id/image).
+  imageUrl: z.string().url().nullable().optional(),
   categoryId: z.string().uuid(),
 });
 
