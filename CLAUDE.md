@@ -13,15 +13,16 @@ enterprise-scale (no microservices, no k8s).
 The project is being built in phases; check recent commits / ask the user for current phase
 status before assuming a feature (auth, cart, payments, admin panel) already exists.
 
-**Current phase status** (2026-11-05): Phases 0-4 are done and committed, plus Phase 5 blocks
-1-3, Phase 6 complete (admin: inventory table, product create/edit/delete, inline stock, category CRUD), Phase 7 (integration tests with supertest against a `cartazo_test` DB + GitHub Actions CI; `next build --webpack` works) and Phase 8 (polish: error/loading/404 states, a11y, a token-based design system + full UI redesign, 16-product seed, OpenAPI/Swagger at `/api/docs` generated from the shared Zod schemas with a drift test, final README). Phase 0 (scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod
+**Current phase status** (2026-11-10): Phases 0-4 are done and committed, plus Phase 5 blocks
+1-3, Phase 6 complete (admin: inventory table, product create/edit/delete, inline stock, category CRUD), Phase 7 (integration tests with supertest against a `cartazo_test` DB + GitHub Actions CI; `next build --webpack` works) and Phase 8 (polish: error/loading/404 states, a11y, a token-based design system + full UI redesign (now the "Góndola" identity + discounts, see below), 16-product seed, OpenAPI/Swagger at `/api/docs` generated from the shared Zod schemas with a drift test, final README). Phase 0 (scaffolding), Phase 1 (Prisma schema, Product/Category CRUD by layers, Zod
 validation, centralized error handling), Phase 2 (Auth: register/login/logout/me, bcrypt, JWT in
 an httpOnly cookie, `requireAuth`/`requireRole('ADMIN')` guarding product/category writes), Phase 3
 (Cart, Orders, checkout with **MercadoPago**, not Stripe — Stripe doesn't support Argentina;
 webhook + order reconciliation), Phase 4 (Next.js catalog + product detail), Phase 5 block 1
 (login/register/session in the web) and block 2 (cart page, add-to-cart, checkout redirect,
 `/orders/[id]`) and block 3 (order history `/orders`), verified end-to-end in the MP sandbox.
-**Next: Phase 9 — not defined yet; ask the user (candidates: deploy; brand identity/colors; product images; README screenshots)** — check with the user before building. No public
+**Visual identity is decided: "Góndola"** (supermarket style inspired by La Anónima, small/neighborhood-scale): brand red `#e30613`, yellow accent, light-gray background, white cards, pill buttons, dark-red category bar, split-screen login. **No dark mode** (removed on purpose: dark text on red, black cards). Prices are plain foreground color, never red. All colors are CSS tokens in `globals.css`; don't propose new palettes unless the user asks. Products have an optional `compareAtPrice` (previous price): the UI shows it struck-through plus a computed "% OFF" (the % is never stored); the service rejects a `compareAtPrice` not greater than `price`; checkout still charges `price`. The seed marks 7 products on offer. After a Prisma migration run `npx prisma generate` if the client doesn't pick up the new field.
+**Next: Phase 9 — not defined yet; ask the user (candidates: deploy; product images; README screenshots; cart counter in the header)** — check with the user before building. No public
 endpoint creates an ADMIN user (avoids privilege escalation via `/register`, which always
 creates `CLIENTE`) — the first admin is bootstrapped via `apps/api/prisma/seed.ts`
 (`admin@cartazo.com` / `admin12345`, change in any real environment).

@@ -8,13 +8,14 @@ productos en PHP plano; está reescrito desde cero en TypeScript.
 
 ## Qué incluye
 
-- **Catálogo** con búsqueda, filtro por categoría y precio, paginación y detalle de producto.
+- **Catálogo** con búsqueda, filtro por categoría y precio, paginación y detalle de producto, con
+  **ofertas** (precio anterior tachado y % OFF) y una identidad visual tipo supermercado de barrio.
 - **Cuentas y sesión** (registro, login, logout) con roles `CLIENTE` y `ADMIN`.
 - **Carrito** persistente por usuario y **checkout con MercadoPago** (modo prueba), con
   confirmación de pago por webhook y reconciliación si el aviso se demora.
 - **Historial de órdenes** y estado de cada pago.
-- **Panel de admin**: inventario, alta/edición/borrado de productos, ajuste de stock inline y
-  gestión de categorías.
+- **Panel de admin**: inventario, alta/edición/borrado de productos (con precio anterior opcional
+  para armar ofertas), ajuste de stock inline y gestión de categorías.
 - **API documentada** con OpenAPI/Swagger, generada desde los mismos schemas que validan los requests.
 
 ## Stack
@@ -47,7 +48,7 @@ npm run dev:web                               # http://localhost:3001
 ```
 
 `DATABASE_URL` en `apps/api/.env` debe coincidir con `POSTGRES_*` del `.env` de la raíz.
-El seed (`npx prisma db seed`, corre solo tras `migrate dev`) crea 5 categorías, 16 productos y un
+El seed (`npx prisma db seed`, corre solo tras `migrate dev`) crea 5 categorías, 16 productos (7 en oferta) y un
 admin de desarrollo: `admin@cartazo.com` / `admin12345` (**cambiar en cualquier entorno real**).
 
 Para probar pagos hace falta un access token de prueba de MercadoPago y, para que llegue el
@@ -98,3 +99,8 @@ packages/shared/ Schemas Zod usados por la API y la web
 ESTUDIO.md       Notas de estudio: arquitectura y el "por qué" de cada fase
 SINTAXIS.md      Glosario de sintaxis anclado a código real del proyecto
 ```
+- **El descuento se calcula, no se guarda:** el producto guarda su precio anterior
+  (`compareAtPrice`, opcional) y el % OFF sale de compararlo con `price`. Debe ser mayor que el
+  precio actual (lo valida el service). Es solo informativo: el checkout cobra `price`.
+- **Interfaz siempre clara:** los colores son tokens CSS (`globals.css`); cambiar la identidad es
+  editar esos tokens.
