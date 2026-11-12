@@ -14,3 +14,7 @@ npm-debug.log*
 .DS_Store
 
 apps/api/prisma/dev.db
+
+# Apuntes personales (solo locales, no se versionan)
+ESTUDIO.md
+SINTAXIS.md
