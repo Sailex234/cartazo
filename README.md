@@ -40,7 +40,7 @@ Requisitos: Node 20+ y Docker.
 ```bash
 cp .env.example .env
 cp apps/api/.env.example apps/api/.env      # completar JWT_SECRET y credenciales de MercadoPago
-cp apps/web/.env.example apps/web/.env.local
+cp apps/web/.env.example apps/web/.env.local   # API_URL (solo servidor) y NEXT_PUBLIC_DEMO
 npm install
 docker compose up -d                          # Postgres
 (cd apps/api && npx prisma migrate dev)       # aplica migraciones y corre el seed
@@ -55,6 +55,20 @@ admin de desarrollo: `admin@cartazo.com` / `admin12345` (**cambiar en cualquier 
 Para probar pagos hace falta un access token de prueba de MercadoPago y, para que llegue el
 webhook, una URL pública (por ejemplo un túnel de ngrok) en `MP_NOTIFICATION_URL`. Sin eso el
 checkout igual funciona: al volver a la orden, la API consulta el pago directamente.
+
+## Demo online
+
+Hay una demo pública, **con datos de prueba y MercadoPago en modo test (no se cobra nada)**:
+<https://cartazo-seven.vercel.app>. Podés entrar como admin con el botón de la pantalla de login.
+
+- **Web:** Vercel. **API:** Render (plan gratis). **Base de datos:** Neon (Postgres, plan gratis).
+- Los planes gratis se duermen por inactividad: la primera visita puede tardar unos segundos en responder.
+- La web le habla a `/api/*` de su propio origen y Next lo reenvía a la API (`rewrites` en
+  `apps/web/next.config.ts`), así la cookie de sesión es de primera parte y no la bloquea el navegador.
+- Variables: en Render (`render.yaml`) `DATABASE_URL` (URL *pooled* de Neon), `WEB_ORIGIN`, `MP_*`; en Vercel
+  (Root Directory `apps/web`) `API_URL` y `NEXT_PUBLIC_DEMO=true`, que muestra el cartel de demo y el acceso rápido.
+- Las migraciones se aplican a mano con la URL *directa* de Neon: `DATABASE_URL=… npx prisma migrate deploy`.
+- La demo lleva `noindex` y la API tiene rate limiting por IP.
 
 ## Documentación de la API
 
@@ -87,6 +101,8 @@ Los tests de integración usan una base aparte (`cartazo_test`, creada una vez c
   abandonado no deje stock reservado. Es un trade-off aceptado a escala de proyecto.
 - **El webhook nunca confía en el aviso:** siempre consulta el estado real del pago a
   MercadoPago, y es idempotente (un aviso repetido no descuenta stock dos veces).
+- **Rate limiting** (`express-rate-limit`): tope general por IP y uno más estricto en login/registro y en la
+  subida de fotos, para frenar fuerza bruta y abuso en la demo pública.
 - **Nadie se registra como admin:** `/register` siempre crea `CLIENTE`; el primer admin sale del seed.
 - **Precios al momento de la compra:** `OrderItem.unitPrice` guarda el precio de ese día; cambiar
   el precio del producto después no altera órdenes viejas.
